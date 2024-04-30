@@ -1,8 +1,9 @@
 #include <iostream>
-#include <Node/Point.cpp>
-#include <Node.cpp>
+#include "Point.h"
 
 using namespace std;
+
+class Node;
 
 struct Entry {
     Point p;
