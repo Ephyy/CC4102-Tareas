@@ -1,5 +1,6 @@
 
 #include <iostream>
+#include <map>
 #include <vector>
 #include <random>
 #include <cmath>
@@ -27,14 +28,3 @@ std::vector<Point> selectRandomPoints(std::vector<Point>& points, int B) {
     return selectedPoints;
 }
 
-// Main
-int main() {
-    std::vector<Point> points = generateRandomPoints(10, 100);
-    std::vector<Point> selectedPoints = selectRandomPoints(points, 2);
-    for (int i = 0; i < selectedPoints.size(); i++)
-        std::cout << selectedPoints[i] << std::endl;
-
-    std::cout << points.size() << std::endl;
-    std::cout << selectedPoints.size() << std::endl;
-    return 0;
-}
