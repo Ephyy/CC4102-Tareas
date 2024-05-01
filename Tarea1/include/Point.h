@@ -6,11 +6,9 @@
 
 
 
-class Point {
-private:
+struct Point {
     double x;
     double y;
-public:
         
     // Constructor
     Point();
