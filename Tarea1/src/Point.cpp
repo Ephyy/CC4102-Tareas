@@ -5,6 +5,8 @@
 
 #include "Point.h"
 
+using namespace std;
+
 // Constructor
 Point::Point() : x(0), y(0) {}
 Point::Point(double x, double y) : x(x), y(y) {}
@@ -25,7 +27,7 @@ double dist(Point p, Point q)
 
 
 // Generate n random points in the range [-range, range]
-std::vector<Point> generateRandomPoints(int n, double range) {
+vector<Point> generateRandomPoints(int n, double range) {
     std::vector<Point> points;
     std::random_device rd; // Seed
     std::mt19937 gen(rd()); // Random number generator

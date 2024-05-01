@@ -6,11 +6,12 @@
 #include <cmath>
 #include "Point.h"
 
+using namespace std;
 
 // Paso 2) del algoritmo CP
 // Se seleccionan K puntos aleatorios de la lista de puntos
-std::vector<Point> selectRandomPoints(std::vector<Point>& points, int B) {
-    std::vector<Point> selectedPoints;
+vector<Point> selectRandomPoints(vector<Point>& points, int B) {
+    vector<Point> selectedPoints;
     int n = points.size();
     int k = std::min(B, n / B);
 
@@ -28,3 +29,14 @@ std::vector<Point> selectRandomPoints(std::vector<Point>& points, int B) {
     return selectedPoints;
 }
 
+// Main
+int main() {
+    vector<Point> points = generateRandomPoints(10, 100);
+    vector<Point> selectedPoints = selectRandomPoints(points, 2);
+    for (int i = 0; i < selectedPoints.size(); i++)
+        std::cout << selectedPoints[i] << std::endl;
+
+    std::cout << points.size() << std::endl;
+    std::cout << selectedPoints.size() << std::endl;
+    return 0;
+}
