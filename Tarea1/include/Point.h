@@ -2,6 +2,7 @@
 #define POINT_H 
 
 #include <math.h>
+#include <vector>
 #include <iostream>
 
 
@@ -21,5 +22,6 @@ struct Point {
 
 
 double dist(Point p, Point q);
+std::vector<Point> generateRandomPoints(int n, double range);
 
 #endif
