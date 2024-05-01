@@ -17,8 +17,8 @@ public:
     Point(double x, double y);
     
     // Getters
-    double get_X();
-    double get_Y();
+    double get_x();
+    double get_y();
 };
 
 
