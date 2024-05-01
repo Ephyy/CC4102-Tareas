@@ -1,14 +1,15 @@
 #include <iostream>
 #include "Point.h"
+#include "Node.h"
 
 int main()
 {
-    std::cout << "Hello World" << std::endl;
+    std::cout << "TESTING" << std::endl;
 
 
     Point p = Point(1, 2);
-    // Point q = Point(3, 4);
-    std::cout << p.get_X() << std::endl;
+    Node n1 = Node(5, 300);
+
     std::cout << p.get_Y() << std::endl;
 
     return 0;
