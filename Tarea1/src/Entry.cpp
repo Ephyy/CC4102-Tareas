@@ -1,7 +1,7 @@
 #include <Entry.h>
 
 // Constructor
-Entry::Entry(Point p, double cr, Node& a) : p(p), cr(cr), a(a) {}
+Entry::Entry(Point p, double cr, std::shared_ptr<Node> a) : p(p), cr(cr), a(a) {}
 
 Point Entry::get_p() {
     return p;
@@ -11,6 +11,6 @@ double Entry::get_cr() {
     return cr;
 }
 
-Node& Entry::get_a() {
+std::shared_ptr<Node> Entry::get_a() {
     return a;
 }

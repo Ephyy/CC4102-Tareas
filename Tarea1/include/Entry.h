@@ -12,17 +12,15 @@ class Entry {
 private:
     Point p;
     double cr;
-    Node& a;
+    std::shared_ptr<Node> a;
 public:
     // Constructor
-    Entry(Point p, double cr, Node& a);
+    Entry(Point p, double cr, std::shared_ptr<Node> a);
 
     // Getters
     Point get_p();
     double get_cr();
-    Node& get_a();
+    std::shared_ptr<Node> get_a();
 };
-
-
 
 #endif
