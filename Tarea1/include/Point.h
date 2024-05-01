@@ -23,5 +23,6 @@ struct Point {
 
 double dist(Point p, Point q);
 std::vector<Point> generateRandomPoints(int n, double range);
+std::ostream& operator<<(std::ostream& os, const Point& p);
 
 #endif
