@@ -48,10 +48,3 @@ std::ostream& operator<<(std::ostream& os, const Point& p) {
     return os;
 }
 
-// Main
-int main() {
-    std::vector<Point> points = generateRandomPoints(10, 100);
-    for (int i = 0; i < points.size(); i++)
-        std::cout << points[i] << std::endl;
-    return 0;
-}
