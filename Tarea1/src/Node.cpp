@@ -3,7 +3,7 @@
 
 
 // Constructor
-Node::Node(double b, double B) : entries(), b(b), B(B) {}
+Node::Node(double B) : entries(), b(B*0.5), B(B) {}
 
 // Getters
 double Node::get_b() {

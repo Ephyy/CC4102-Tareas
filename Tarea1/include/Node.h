@@ -2,7 +2,11 @@
 #define NODE_H
 
 #include <set>
+#include <memory>
 #include "Entry.h" // Include the missing header file for the 'Entry' class
+
+
+class Entry; // Forward declaration of the 'Entry' class
 
 class Node {
 private:
@@ -12,12 +16,11 @@ private:
 
 public:
     // Constructor
-    Node(double b, double B);
+    Node(double B);
 
     // Getters
     double get_b();
     double get_B();
-
 };
 
 #endif
