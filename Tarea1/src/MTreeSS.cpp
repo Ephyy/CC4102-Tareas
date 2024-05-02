@@ -67,5 +67,11 @@ class MTreeBySS {
         //     }
         // }
 
+        // void insert(Node cur, vector<int> key) {
+        //     if (cur->children.size() == 0) {
+        //         cur->children[key] = new MTreeNode();
+        //         return;
+        //     }
+
         
 };
