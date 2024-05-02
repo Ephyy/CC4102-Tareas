@@ -67,5 +67,32 @@ class MTreeBySS {
         //     }
         // }
 
+
+        void cluster(Node cur, vector<int> key) {
+            if (cur->children.size() == 0) {
+                cur->children[key] = new MTreeNode();
+                return;
+            }
+            double min_dist = 1e9;
+            Node best_child = nullptr;
+            for (auto& child : cur->children) {
+                double dist = 0;
+                for (int i = 0; i < key.size(); i++) {
+                    dist += (child.first[i] - key[i]) * (child.first[i] - key[i]);
+                }
+                if (dist < min_dist) {
+                    min_dist = dist;
+                    best_child = child.second;
+                }
+            }
+            if (min_dist < b) {
+                cluster(best_child, key);
+            } else {
+                cur->children[key] = new MTreeNode();
+            }
+        }
+
         
+
+
 };
