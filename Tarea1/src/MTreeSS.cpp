@@ -2,76 +2,85 @@
 #include <vector>
 #include <algorithm>
 #include <cmath>
-#include <cassert>
 #include <queue>
 #include <set>
 #include <map>
 #include <unordered_map>
 #include <unordered_set>
-#include <string>
-#include <sstream>
-#include <fstream>
-#include <iomanip>
-#include <chrono>
-#include <random>
-#include <functional>
-#include <numeric>
-#include <memory>
-#include <thread>
-#include <mutex>
-#include <condition_variable>
-#include "Entry.h"
+#include <utility>
+#include "Node.h"
+#include "Cluster.h"
 
 using namespace std;
 
 class MTreeBySS {
     public:
         Node &root;
-        double B;
-        double b;
+        double max_size;
+        double min_size;
 
-        MTreeBySS(double B, double b, Node &root) : root(root) {
-            this->B = B;
-            this->b = b;
+        MTreeBySS(double max_size, double min_size, Node &root) : root(root) {
+            this->max_size = max_size;
+            this->min_size = min_size;
             // root = new MTreeNode();
         }
 
-        // Node add_point(Node cur, vector<int> key) {
-        //     if (cur->children.find(key) == cur->children.end()) {
-        //         cur->children[key] = new MTreeNode();
-        //     }
-        //     return cur->children[key];
-        // }
+    
+        // Function OutputLeafPage(
+        // Cin: a set of points of cardinality no
+        // greater that will fit into a disk page
+        // )
+        // Returns a tuple (m,r, a) where:
+        //     m is the primary medoid of Cin,
+        //     r is called the covering radius,
+        //     a is the disk address of the page output.
+        tuple<Point, double, Node &> outputLeafPage(Cluster c_in){
+            Point g = c_in.set_primary_medoid();
+            double r = 0;
+            vector<Entry> C;
 
-        // void cluster(Node cur, vector<int> key) {
-        //     if (cur->children.size() == 0) {
-        //         cur->children[key] = new MTreeNode();
-        //         return;
-        //     }
-        //     double min_dist = 1e9;
-        //     Node best_child = nullptr;
-        //     for (auto& child : cur->children) {
-        //         double dist = 0;
-        //         for (int i = 0; i < key.size(); i++) {
-        //             dist += (child.first[i] - key[i]) * (child.first[i] - key[i]);
-        //         }
-        //         if (dist < min_dist) {
-        //             min_dist = dist;
-        //             best_child = child.second;
-        //         }
-        //     }
-        //     if (min_dist < b) {
-        //         cluster(best_child, key);
-        //     } else {
-        //         cur->children[key] = new MTreeNode();
-        //     }
-        // }
+            for (Point p : c_in.points) {
+                C.push_back(Entry(p, NULL, NULL));
+                r = max(r, g.dist(p, g));
+            }
 
-        // void insert(Node cur, vector<int> key) {
-        //     if (cur->children.size() == 0) {
-        //         cur->children[key] = new MTreeNode();
-        //         return;
-        //     }
+            vector<Point>* a = &C;
+            return make_tuple(g, r, a);
+        }
+
+        // Function OutputInternalPage (
+        // Cmra: a set of (m,r, a) tuples as returned from OutputLeafPage
+        // )
+        // Returns (M, R, A) where:
+        // M is the primary medoid of the set of
+        // points Cin = {m|∃(m,r, a) ∈ Cmra},
+        // R is called the covering radius,
+        // A is the disk address of the page output.
+        tuple<Point, double, Node &> outputInternalPage(vector<tuple<Point, double, Node &>> c_mra){
+            // We need to calculate the primary medoid of the set of points Cin
+            Cluster C_in;
+            for (tuple<Point, double, Node &> t : c_mra) {
+                C_in.points.push_back(get<0>(t));
+            }
+            Point G = C_in.set_primary_medoid();
+            double R = 0;
+            set<Point> C;
+
+            for (tuple<Point, double, Node &> t : c_mra) {
+                C.insert(get<0>(t));
+                R = max(R, get<0>(t).dist(G, get<0>(t)));
+            }
+
+            set<Point>* A = &C;
+            return make_tuple(G, R, A);
+        }
+
+        // Function BulkLoad(
+        // Cin: a set of points in a metric space,
+        // CMAX: maximum number of node entries that will fit into a disk page
+        // )
+        // Returns disk address of root page of constructed M-tree
+        Node bulkLoad(vector<Point> &c_in);
 
         
 };
