@@ -37,14 +37,14 @@ class MTreeBySS {
         tuple<Point, double, Node &> outputLeafPage(Cluster c_in){
             Point g = c_in.set_primary_medoid();
             double r = 0;
-            set<Point> C;
+            vector<Entry> C;
 
             for (Point p : c_in.points) {
-                C.insert(Entry(p, NULL, NULL));
-                r = max(r, g.distance(p, g));
+                C.push_back(Entry(p, NULL, NULL));
+                r = max(r, g.dist(p, g));
             }
 
-            set<Point>* a = &C;
+            vector<Point>* a = &C;
             return make_tuple(g, r, a);
         }
 
@@ -56,7 +56,24 @@ class MTreeBySS {
         // points Cin = {m|∃(m,r, a) ∈ Cmra},
         // R is called the covering radius,
         // A is the disk address of the page output.
-        tuple<Point, double, Node &> outputInternalPage(vector<tuple<Point, double, Node &>> &c_mra);
+        tuple<Point, double, Node &> outputInternalPage(vector<tuple<Point, double, Node &>> c_mra){
+            // We need to calculate the primary medoid of the set of points Cin
+            Cluster C_in;
+            for (tuple<Point, double, Node &> t : c_mra) {
+                C_in.points.push_back(get<0>(t));
+            }
+            Point G = C_in.set_primary_medoid();
+            double R = 0;
+            set<Point> C;
+
+            for (tuple<Point, double, Node &> t : c_mra) {
+                C.insert(get<0>(t));
+                R = max(R, get<0>(t).distance(G, get<0>(t)));
+            }
+
+            set<Point>* A = &C;
+            return make_tuple(G, R, A);
+        }
 
         // Function BulkLoad(
         // Cin: a set of points in a metric space,
