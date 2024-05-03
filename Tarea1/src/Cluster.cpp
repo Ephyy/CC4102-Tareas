@@ -1,20 +1,21 @@
 #include <iostream>
+#include <vector>
+#include "Point.h"
 
 using namespace std;
 
 class Cluster {
     public:
-        int x;
-        int y;
-        int z;
-        int id;
-        Cluster(int x, int y, int z, int id) {
-            this->x = x;
-            this->y = y;
-            this->z = z;
-            this->id = id;
+        vector<Point> points;
+        Point primary_medoid;
+        double radius;
+        double max_size;
+        double min_size;
+
+        Cluster() {
+            radius = 0;
+            max_size = 0;
+            min_size = 0;
         }
-        void print() {
-            cout << "Cluster " << id << ": (" << x << ", " << y << ", " << z << ")" << endl;
-        }
+        
 };
