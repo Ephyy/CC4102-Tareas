@@ -52,6 +52,10 @@ void Cluster::insert(Point point) {
     this->points.push_back(point_ptr);
 }
 
+int Cluster::size() {
+    return this->points.size();
+}
+
 vector<Cluster> cluster(double max_size, vector<Point> &points) {
     // First phase: converts the input set of points into a set of singleton clusters.
     // Let Cout = {} ;
