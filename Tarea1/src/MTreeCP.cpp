@@ -29,14 +29,43 @@ vector<Point> selectRandomPoints(vector<Point>& points, int B) {
     return selectedPoints;
 }
 
-// Main
-int main() {
-    vector<Point> points = generateRandomPoints(10, 100);
-    vector<Point> selectedPoints = selectRandomPoints(points, 2);
-    for (int i = 0; i < selectedPoints.size(); i++)
-        std::cout << selectedPoints[i] << std::endl;
-
-    std::cout << points.size() << std::endl;
-    std::cout << selectedPoints.size() << std::endl;
-    return 0;
+// Paso 3) del algoritmo CP
+// Se asigna cada punto a su sample más cercano
+vector<vector<Point>> nearestSample(vector<Point>& points, vector<Point>& samples) {
+    vector<vector<Point>> nearestSamples(samples.size()); // Crea un vector de vectores de puntos, uno para cada muestra
+    
+    for (int i = 0; i < points.size(); i++) {
+        Point p = points[i];
+        double minDist = dist(p, samples[0]);
+        int nearestSamp = 0;
+        for (int j = 1; j < samples.size(); j++) {
+            double d = dist(p, samples[j]);
+            if (d < minDist) {
+                minDist = d;
+                nearestSamp = j;
+            }
+        }
+        nearestSamples[nearestSamp].push_back(p); // Add the point to the vector of nearest points for the corresponding sample
+    }
+    return nearestSamples;
 }
+
+
+std::ostream& operator<<(std::ostream& os, const std::vector<Point>& v) {
+    os << "[";
+    for (const auto& p : v) {
+        os << p << " ";
+    }
+    os << "]";
+    return os;
+}
+
+std::ostream& operator<<(std::ostream& os, const std::vector<std::vector<Point>>& vv) {
+    os << "[";
+    for (const auto& v : vv) {
+        os << v << " ";
+    }
+    os << "]";
+    return os;
+}
+
