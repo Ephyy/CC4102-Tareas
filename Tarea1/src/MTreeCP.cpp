@@ -8,6 +8,24 @@
 
 using namespace std;
 
+std::ostream& operator<<(std::ostream& os, const std::vector<Point>& v) {
+    os << "[";
+    for (const auto& p : v) {
+        os << p << " ";
+    }
+    os << "]";
+    return os;
+}
+
+std::ostream& operator<<(std::ostream& os, const std::vector<std::vector<Point>>& vv) {
+    os << "[";
+    for (const auto& v : vv) {
+        os << v << " ";
+    }
+    os << "]";
+    return os;
+}
+
 // Entrega el indice del punto más cercano a p en el vector de puntos points
 int nearestPoint(Point p, vector<Point>& points) {
     double minDist = dist(p, points[0]);
@@ -22,8 +40,9 @@ int nearestPoint(Point p, vector<Point>& points) {
     return nearest;
 }
 
-// Paso 2) del algoritmo CP
+// Paso 2) del metodo CP
 // Se seleccionan K puntos aleatorios de la lista de puntos
+// Entrega el conjunto de samples F
 vector<Point> selectRandomPoints(vector<Point>& points, int B) {
     vector<Point> selectedPoints;
     int n = points.size();
@@ -43,8 +62,9 @@ vector<Point> selectRandomPoints(vector<Point>& points, int B) {
     return selectedPoints;
 }
 
-// Paso 3) del algoritmo CP
+// Paso 3) del metodo CP
 // Se asigna cada punto a su sample más cercano
+// Entrega un vector con los conjuntos F_k: Los puntos más cercanos a cada sample
 vector<vector<Point>> nearestSample(vector<Point>& points, vector<Point>& samples) {
     vector<vector<Point>> nearestSamples(samples.size()); // Crea un vector de vectores de puntos, uno para cada muestra
     
@@ -56,7 +76,7 @@ vector<vector<Point>> nearestSample(vector<Point>& points, vector<Point>& sample
     return nearestSamples;
 }
 
-// Paso 4) del algoritmo CP.
+// Paso 4) del metodo CP.
 // Etapa de redistribución
 void cpRedistribution(vector<Point>& samples, vector<vector<Point>>& F, double b) {
     vector<int> toRemove;
@@ -88,22 +108,35 @@ void cpRedistribution(vector<Point>& samples, vector<vector<Point>>& F, double b
     }
 }
 
+// // Paso 5) del metodo CP.
+// // Volver al paso 2 si el tamaño del conjunto F es igual a 1
+// vector<vector<Point>> checkFSize(vector<vector<Point>>& F) {
+//     if (F.size() == 1) {
+//         selectRandomPoints( ... , B);
+//         nearestSample( ... );
+//         cpRedistribution( ... );
 
-std::ostream& operator<<(std::ostream& os, const std::vector<Point>& v) {
-    os << "[";
-    for (const auto& p : v) {
-        os << p << " ";
-    }
-    os << "]";
-    return os;
-}
+//         return checkFSize(...);
+//     }
+//     return F;
 
-std::ostream& operator<<(std::ostream& os, const std::vector<std::vector<Point>>& vv) {
-    os << "[";
-    for (const auto& v : vv) {
-        os << v << " ";
-    }
-    os << "]";
-    return os;
-}
+// }
 
+// // Main
+// int main() {
+//     vector<Point> points = generateRandomPoints(15, 100);
+//     vector<Point> samples = selectRandomPoints(points, 3);
+
+
+
+//     vector<vector<Point>> nearestSamples = nearestSample(points, samples);
+//     std::cout << nearestSamples << std::endl;
+
+//     cpRedistribution(samples, nearestSamples, 3);
+
+//     std::cout << "Post Distribucion:" << std::endl;
+//     std::cout << samples << std::endl;
+//     std::cout << nearestSamples << std::endl;
+    
+//     return 0;
+// }
