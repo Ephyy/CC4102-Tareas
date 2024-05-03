@@ -34,17 +34,17 @@ class MTreeBySS {
         //     m is the primary medoid of Cin,
         //     r is called the covering radius,
         //     a is the disk address of the page output.
-        tuple<Point, double, Node &> outputLeafPage(Cluster c_in){
+        tuple<Point, double, vector<Entry>*> outputLeafPage(Cluster c_in){
             Point g = c_in.set_primary_medoid();
             double r = 0;
             vector<Entry> C;
 
             for (Point p : c_in.points) {
                 C.push_back(Entry(p, NULL, NULL));
-                r = max(r, g.dist(p, g));
+                r = max(r, dist(g, p));
             }
 
-            vector<Point>* a = &C;
+            vector<Entry>* a = &C;
             return make_tuple(g, r, a);
         }
 
@@ -56,22 +56,24 @@ class MTreeBySS {
         // points Cin = {m|∃(m,r, a) ∈ Cmra},
         // R is called the covering radius,
         // A is the disk address of the page output.
-        tuple<Point, double, Node &> outputInternalPage(vector<tuple<Point, double, Node &>> c_mra){
+        tuple<Point, double, vector<tuple<Point, double, vector<Entry>*>>*> outputInternalPage(vector<tuple<Point, double, vector<Entry>*>> c_mra){
+            
             // We need to calculate the primary medoid of the set of points Cin
             Cluster C_in;
-            for (tuple<Point, double, Node &> t : c_mra) {
+            for (tuple<Point, double, vector<Entry>*> t : c_mra) {
                 C_in.points.push_back(get<0>(t));
             }
             Point G = C_in.set_primary_medoid();
+            
             double R = 0;
-            set<Point> C;
+            vector<tuple<Point, double, vector<Entry>*>> C;
 
-            for (tuple<Point, double, Node &> t : c_mra) {
-                C.insert(get<0>(t));
-                R = max(R, get<0>(t).dist(G, get<0>(t)));
+            for (tuple<Point, double, vector<Entry>*> t : c_mra) {
+                C.push_back(t);
+                R = max(R, dist(G, get<0>(t)));
             }
 
-            set<Point>* A = &C;
+            vector<tuple<Point, double, vector<Entry>*>>* A = &C;
             return make_tuple(G, R, A);
         }
 
