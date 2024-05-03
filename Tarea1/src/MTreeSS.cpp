@@ -9,6 +9,7 @@
 #include <unordered_set>
 #include <utility>
 #include "Node.h"
+#include "Cluster.h"
 
 using namespace std;
 
