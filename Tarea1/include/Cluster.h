@@ -40,14 +40,21 @@ class Cluster {
         // Given a cluster c, a nearest neighbour of c in a set of clusters C is a cluster c'
         // such that there is no other cluster in C whose distance to c is less than
         // that between c and c'. (c may have multiple nearest neighbours in C.)
-        Cluster nearest_neighbour(vector<Cluster> clusters);
+        Cluster &nearest_neighbour(vector<Cluster> clusters);
+
+        // Returns a NEW cluster that is the result of merging this cluster with another.
+        Cluster &merge(Cluster &cluster);
+
+        pair<Cluster &, Cluster &> split();
 };
 
 // A closest pair of clusters in C is a pair of clusters c1, c2 ∈ C such that
 // d(c1, c2) <= d(ci, cj) for all ci, cj ∈ C
 // 
 // For the returned pair, |c1| > |c2|
-pair<Cluster, Cluster> closest_pair(vector<Cluster> clusters);
+// It returns the iterators to the clusters in the input vector.
+// pair<vector<Cluster>::iterator, vector<Cluster>::iterator> closest_pair(vector<Cluster> clusters);
+pair<Cluster &, Cluster &> closest_pair(vector<Cluster> clusters);
 
 // Returns a set of clusters, each of cardinality in [CMAX/2, CMAX].
 // 
