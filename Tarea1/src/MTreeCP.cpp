@@ -8,6 +8,20 @@
 
 using namespace std;
 
+// Entrega el indice del punto más cercano a p en el vector de puntos points
+int nearestPoint(Point p, vector<Point>& points) {
+    double minDist = dist(p, points[0]);
+    int nearest = 0;
+    for (int i = 1; i < points.size(); i++) {
+        double d = dist(p, points[i]);
+        if (d < minDist) {
+            minDist = d;
+            nearest = i;
+        }
+    }
+    return nearest;
+}
+
 // Paso 2) del algoritmo CP
 // Se seleccionan K puntos aleatorios de la lista de puntos
 vector<Point> selectRandomPoints(vector<Point>& points, int B) {
@@ -36,18 +50,42 @@ vector<vector<Point>> nearestSample(vector<Point>& points, vector<Point>& sample
     
     for (int i = 0; i < points.size(); i++) {
         Point p = points[i];
-        double minDist = dist(p, samples[0]);
-        int nearestSamp = 0;
-        for (int j = 1; j < samples.size(); j++) {
-            double d = dist(p, samples[j]);
-            if (d < minDist) {
-                minDist = d;
-                nearestSamp = j;
-            }
-        }
-        nearestSamples[nearestSamp].push_back(p); // Add the point to the vector of nearest points for the corresponding sample
+        int nearestSamp = nearestPoint(p, samples); // Encuentra el índice del sample más cercano a p
+        nearestSamples[nearestSamp].push_back(p); // Agrega p al conjunto de puntos del sample más cercano
     }
     return nearestSamples;
+}
+
+// Paso 4) del algoritmo CP.
+// Etapa de redistribución
+void cpRedistribution(vector<Point>& samples, vector<vector<Point>>& F, double b) {
+    vector<int> toRemove;
+    // Por cada conjunto (F_j) en F
+    for (int j = 0; j < F.size(); j++) {
+        if (F[j].size() < b) {
+            // Quitamos el sample p_j de la lista de samples
+            Point p_j = samples[j];
+            samples.erase(samples.begin() + j);
+            toRemove.push_back(j); // Guardamos el índice del conjunto que se eliminará
+
+            // Por cada punto en F[j], lo asignamos al sample más cercano de F y lo agremos a su conjunto de puntos
+            for (int i = 0; i < F[j].size(); i++) {
+                Point p = F[j][i];
+                int nearestSamp = nearestPoint(p, samples);
+                F[nearestSamp].push_back(p);
+            }
+        }
+    }
+
+    // Si no hay conjuntos que eliminar, retornamos
+    if (toRemove.size() == 0) {
+        return;
+    }
+
+    // Eliminamos los conjuntos asociado a p_j que fueron eliminados
+    for (int i = toRemove.size() - 1; i >= 0; i--) {
+        F.erase(F.begin() + toRemove[i]);
+    }
 }
 
 
