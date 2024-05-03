@@ -68,7 +68,7 @@ class MTreeBySS {
 
             for (tuple<Point, double, Node &> t : c_mra) {
                 C.insert(get<0>(t));
-                R = max(R, get<0>(t).distance(G, get<0>(t)));
+                R = max(R, get<0>(t).dist(G, get<0>(t)));
             }
 
             set<Point>* A = &C;
