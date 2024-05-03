@@ -47,8 +47,8 @@ double Cluster::distance(Cluster cluster) {
 }
 
 // Test proper insertion of points *******************
-void Cluster::insert(Point point) {
-    shared_ptr<Point> point_ptr = make_shared<Point>(point);
+void Cluster::insert(shared_ptr<Point> point) {
+    shared_ptr<Point> point_ptr = shared_ptr<Point>(point);
     this->points.push_back(point_ptr);
 }
 
@@ -72,13 +72,24 @@ pair<Cluster &, vector<Cluster>::iterator> Cluster::nearest_neighbour(vector<Clu
     return make_pair(ref(nearest_cluster), nearest_cluster_iter);
 }
 
-vector<Cluster> cluster(double max_size, vector<Point> &points) {
+Cluster Cluster::merge(Cluster &cluster) {
+    Cluster merged_cluster = Cluster(this->max_size);
+    for_each(this->points.begin(), this->points.end(), [&merged_cluster] (shared_ptr<Point> point) {
+        merged_cluster.insert(shared_ptr<Point>(point));
+    });
+    for_each(cluster.points.begin(), cluster.points.end(), [&merged_cluster] (shared_ptr<Point> point) {
+        merged_cluster.insert(shared_ptr<Point>(point));
+    });
+    return merged_cluster;
+}
+
+vector<Cluster> cluster(double max_size, vector<shared_ptr<Point>> points) {
     // First phase: converts the input set of points into a set of singleton clusters.
     // Let Cout = {} ;
     vector<Cluster> clusters_output;
     // Let C = {} ;
     vector<Cluster> clusters; 
-    for_each(points.begin(), points.end(), [&clusters, max_size] (Point point) {
+    for_each(points.begin(), points.end(), [&clusters, max_size] (shared_ptr<Point> point) {
         Cluster singleton_cluster = Cluster(max_size);
         singleton_cluster.insert(point);
         clusters.push_back(singleton_cluster);
@@ -126,7 +137,7 @@ vector<Cluster> cluster(double max_size, vector<Point> &points) {
     //     neareast_cluster = Cluster(max_size);
     // }
 
-    Cluster &merged_cluster = last_cluster.merge(neareast_cluster);
+    Cluster merged_cluster = last_cluster.merge(neareast_cluster);
     if (merged_cluster.size() <= max_size) {
         // Add c ∪ c' to Cout 
         clusters_output.push_back(merged_cluster);
