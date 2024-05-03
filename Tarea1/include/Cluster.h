@@ -45,14 +45,9 @@ class Cluster {
 // , cj ∈ C
 pair<Cluster, Cluster> closest_pair(vector<Cluster> clusters);
 
-// Function Cluster (
-// CMAX: maximum acceptable cardinality of a cluster,
-// Cin: a set of at least CMAX
-// 2
-// points
-// )
-// Returns a set of clusters, each of cardinality in [
-// CMAX
-// 2
-// , CMAX].
+// Returns a set of clusters, each of cardinality in [CMAX/2, CMAX].
+// 
+// Arguments:
+//      CMAX: maximum acceptable cardinality of a cluster,
+//      Cin: a set of at least CMAX/2 points
 vector<Cluster> cluster(double CMAX, vector<Point> &c_in);
