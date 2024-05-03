@@ -30,7 +30,7 @@ class Cluster {
         // The distance between two clusters is that between their primary medoids.
         double distance(Cluster cluster);
 
-        void insert(Point p);
+        void insert(shared_ptr<Point> point);
 
         int size();
 
@@ -40,7 +40,7 @@ class Cluster {
         pair<Cluster &, vector<Cluster>::iterator> nearest_neighbour(vector<Cluster> clusters);
 
         // Returns a NEW cluster that is the result of merging this cluster with another.
-        Cluster &merge(Cluster &cluster);
+        Cluster merge(Cluster &cluster);
 
         pair<Cluster &, Cluster &> split();
 };
