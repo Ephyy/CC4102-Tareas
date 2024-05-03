@@ -40,9 +40,13 @@ int nearestPoint(Point p, vector<Point>& points) {
     return nearest;
 }
 
-// Paso 2) del metodo CP
-// Se seleccionan K puntos aleatorios de la lista de puntos
+// ## Paso 2) del metodo CP
+// Se seleccionan K puntos aleatorios de la lista de puntos.
+//
+// Returns:
 // Entrega el conjunto de samples F
+//
+// Ej: selectRandomPoints([(1, 2) (2, 3) (3, 4) (5, 6) ... ], B=2) -> [(1, 2), (5, 6)] 
 vector<Point> selectRandomPoints(vector<Point>& points, int B) {
     vector<Point> selectedPoints;
     int n = points.size();
@@ -62,8 +66,10 @@ vector<Point> selectRandomPoints(vector<Point>& points, int B) {
     return selectedPoints;
 }
 
-// Paso 3) del metodo CP
+// ## Paso 3) del metodo CP
 // Se asigna cada punto a su sample más cercano
+// 
+// Returns:
 // Entrega un vector con los conjuntos F_k: Los puntos más cercanos a cada sample
 vector<vector<Point>> nearestSample(vector<Point>& points, vector<Point>& samples) {
     vector<vector<Point>> nearestSamples(samples.size()); // Crea un vector de vectores de puntos, uno para cada muestra
@@ -76,7 +82,8 @@ vector<vector<Point>> nearestSample(vector<Point>& points, vector<Point>& sample
     return nearestSamples;
 }
 
-// Paso 4) del metodo CP.
+// ## Paso 4) del metodo CP.
+//
 // Etapa de redistribución
 void cpRedistribution(vector<Point>& samples, vector<vector<Point>>& F, double b) {
     vector<int> toRemove;
@@ -108,35 +115,45 @@ void cpRedistribution(vector<Point>& samples, vector<vector<Point>>& F, double b
     }
 }
 
-// // Paso 5) del metodo CP.
-// // Volver al paso 2 si el tamaño del conjunto F es igual a 1
-// vector<vector<Point>> checkFSize(vector<vector<Point>>& F) {
-//     if (F.size() == 1) {
-//         selectRandomPoints( ... , B);
-//         nearestSample( ... );
-//         cpRedistribution( ... );
+// ## Paso 5) del metodo CP.
+//
+// Volver al paso 2 si el tamaño del conjunto F es igual a 1
+//
+// Returns:
+// 
+vector<vector<Point>> checkFSize(vector<vector<Point>>& F, double B) {
+    if (F.size() == 1) {
+        vector<Point> new_samples = selectRandomPoints(points, B);
+        vector<vector<Point>> new_F = nearestSample(points, new_samples);
+        cpRedistribution(new_samples, new_F, b);
+        return checkFSize(...);
+    }
+    return F;
 
-//         return checkFSize(...);
-//     }
-//     return F;
+}
 
-// }
+// ## Paso 6) del metodo CP
+// 
+// Se realiza recursivamente el algoritmo CP en cada Fj, obteniendo el arbol Tj
+void makeTjTrees() {
 
-// // Main
-// int main() {
-//     vector<Point> points = generateRandomPoints(15, 100);
-//     vector<Point> samples = selectRandomPoints(points, 3);
+}
+
+// Main
+int main() {
+    vector<Point> points = generateRandomPoints(15, 100);
+    vector<Point> samples = selectRandomPoints(points, 3);
 
 
 
-//     vector<vector<Point>> nearestSamples = nearestSample(points, samples);
-//     std::cout << nearestSamples << std::endl;
+    vector<vector<Point>> nearestSamples = nearestSample(points, samples);
+    std::cout << nearestSamples << std::endl;
 
-//     cpRedistribution(samples, nearestSamples, 3);
+    cpRedistribution(samples, nearestSamples, 3);
 
-//     std::cout << "Post Distribucion:" << std::endl;
-//     std::cout << samples << std::endl;
-//     std::cout << nearestSamples << std::endl;
+    std::cout << "Post Distribucion:" << std::endl;
+    std::cout << samples << std::endl;
+    std::cout << nearestSamples << std::endl;
     
-//     return 0;
-// }
+    return 0;
+}
