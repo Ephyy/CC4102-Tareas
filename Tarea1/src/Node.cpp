@@ -13,3 +13,7 @@ double Node::get_b() {
 double Node::get_B() {
     return B;
 }
+
+void Node::insert(Entry e) {
+    entries.push_back(e);
+}

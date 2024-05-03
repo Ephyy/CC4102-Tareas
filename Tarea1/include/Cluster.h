@@ -16,11 +16,7 @@ class Cluster {
         // b
         double min_size;
 
-        Cluster() {
-            radius = 0;
-            max_size = 0;
-            min_size = 0;
-        }
+        Cluster(double max_size);
 
         // Obtains the primary medoid from the points in the cluster:
         // the least medoid of the cluster in this order.
@@ -40,14 +36,21 @@ class Cluster {
         // Given a cluster c, a nearest neighbour of c in a set of clusters C is a cluster c'
         // such that there is no other cluster in C whose distance to c is less than
         // that between c and c'. (c may have multiple nearest neighbours in C.)
-        Cluster nearest_neighbour(vector<Cluster> clusters);
+        pair<Cluster &, vector<Cluster>::iterator> nearest_neighbour(vector<Cluster> clusters);
+
+        // Returns a NEW cluster that is the result of merging this cluster with another.
+        Cluster &merge(Cluster &cluster);
+
+        pair<Cluster &, Cluster &> split();
 };
 
+// Returns a pair of a pair with the cluster and its iterator from the closest pair of clusters.
+// 
 // A closest pair of clusters in C is a pair of clusters c1, c2 ∈ C such that
 // d(c1, c2) <= d(ci, cj) for all ci, cj ∈ C
 // 
 // For the returned pair, |c1| > |c2|
-pair<Cluster, Cluster> closest_pair(vector<Cluster> clusters);
+pair<pair<Cluster &, vector<Cluster>::iterator>, pair<Cluster &, vector<Cluster>::iterator>> closest_pair(vector<Cluster> clusters);
 
 // Returns a set of clusters, each of cardinality in [CMAX/2, CMAX].
 // 
