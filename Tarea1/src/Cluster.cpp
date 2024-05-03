@@ -3,13 +3,43 @@
 
 using namespace std;
 
-Cluster::Cluster(double max_size) {
-    this->max_size = max_size;
-    this->min_size = max_size / 2;
-    this->radius = 0;
-    this->points = vector<Point> ({});
+// Cluster::Cluster(double max_size) {
+//     this->max_size = max_size;
+//     this->min_size = max_size / 2;
+//     this->radius = 0;
+//     this->points = ();
+//     // Point medoid = this->points[0]; // it this even ok??? is it garbage???
+//     this->primary_medoid = Point(); // gets a reference to the garbage???
+// }
+Cluster::Cluster(double max_size) : 
+    max_size(max_size), 
+    min_size(max_size / 2), 
+    radius(0), 
+    points() {
 }
 
+// Think about an optimization for this function 
+// Podria ir guardando los iteradores de los puntos en un set
+// Pensando que cada punto es una única instancia de Point, puedo guardar una tupla con ambos punteros
+// y las distancias en un set ordenado por distancia ayyy no se
+Point Cluster::set_primary_medoid() {
+    if (this->points.size() == 0) {
+        return Point();
+    }
+    // double medoid_radius = this->radius;
+    // Point medoid;
+    for_each(this->points.begin(), this->points.end(), [this] (shared_ptr<Point> point) {
+        double max_radius = 0;
+        for_each(this->points.begin(), this->points.end(), [&max_radius, point] (shared_ptr<Point> other_point) {
+            max_radius = max(max_radius, dist(*point, *other_point));
+        });
+        if (max_radius > this->radius) {
+            this->radius = max_radius;
+            this->primary_medoid = shared_ptr<Point>(point);
+        }
+    });
+    return *this->primary_medoid;
+}
 
 vector<Cluster> cluster(double max_size, vector<Point> &points) {
     // First phase: converts the input set of points into a set of singleton clusters.
