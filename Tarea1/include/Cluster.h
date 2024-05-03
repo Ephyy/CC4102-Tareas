@@ -1,6 +1,7 @@
 #include <iostream>
 #include <vector>
 #include <utility>
+#include <memory>
 #include "Point.h"
 
 using namespace std;
@@ -8,8 +9,8 @@ using namespace std;
 class Cluster {
     public:
         // Ver si es mejor usar otra estructura de datos
-        vector<Point> points;
-        Point primary_medoid;
+        vector<shared_ptr<Point>> points;
+        shared_ptr<Point> primary_medoid;
         double radius;
         // B 
         double max_size; 
