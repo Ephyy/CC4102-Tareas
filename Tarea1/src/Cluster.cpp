@@ -56,6 +56,22 @@ int Cluster::size() {
     return this->points.size();
 }
 
+pair<Cluster &, vector<Cluster>::iterator> Cluster::nearest_neighbour(vector<Cluster> clusters) {
+    Cluster &nearest_cluster = clusters[0];
+    vector<Cluster>::iterator nearest_cluster_iter = clusters.begin();
+    double min_distance = this->distance(nearest_cluster);
+    for (vector<Cluster>::iterator cluster_iter = clusters.begin(); cluster_iter != clusters.end(); cluster_iter++) {
+        Cluster &current_cluster = *cluster_iter;
+        double distance = this->distance(current_cluster);
+        if (distance < min_distance) {
+            min_distance = distance;
+            nearest_cluster = current_cluster;
+            nearest_cluster_iter = cluster_iter;
+        }
+    }
+    return make_pair(ref(nearest_cluster), nearest_cluster_iter);
+}
+
 vector<Cluster> cluster(double max_size, vector<Point> &points) {
     // First phase: converts the input set of points into a set of singleton clusters.
     // Let Cout = {} ;
