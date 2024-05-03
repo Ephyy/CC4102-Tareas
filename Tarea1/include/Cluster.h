@@ -43,10 +43,10 @@ class Cluster {
         Cluster nearest_neighbour(vector<Cluster> clusters);
 };
 
-//  A closest pair of clusters in C is a pair of clusters c1, c2 ∈ C such that
-// d(c1, c2) 6 d(ci
-// , cj ) for all ci
-// , cj ∈ C
+// A closest pair of clusters in C is a pair of clusters c1, c2 ∈ C such that
+// d(c1, c2) <= d(ci, cj) for all ci, cj ∈ C
+// 
+// For the returned pair, |c1| > |c2|
 pair<Cluster, Cluster> closest_pair(vector<Cluster> clusters);
 
 // Returns a set of clusters, each of cardinality in [CMAX/2, CMAX].
