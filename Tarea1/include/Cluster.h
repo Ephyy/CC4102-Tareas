@@ -33,6 +33,8 @@ class Cluster {
         // The distance between two clusters is that between their primary medoids.
         double distance(Cluster cluster);
 
+        void insert(Point p);
+
         // Given a cluster c, a nearest neighbour of c in a set of clusters C is a cluster c'
         // such that there is no other cluster in C whose distance to c is less than
         // that between c and c'. (c may have multiple nearest neighbours in C.)

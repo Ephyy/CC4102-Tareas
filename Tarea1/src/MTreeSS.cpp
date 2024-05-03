@@ -34,7 +34,19 @@ class MTreeBySS {
         //     m is the primary medoid of Cin,
         //     r is called the covering radius,
         //     a is the disk address of the page output.
-        tuple<Point, double, Node &> outputLeafPage(vector<Point> &c_in);
+        tuple<Point, double, Node &> outputLeafPage(Cluster c_in){
+            Point g = c_in.set_primary_medoid();
+            double r = 0;
+            set<Point> C;
+
+            for (Point p : c_in.points) {
+                C.insert(Entry(p, NULL, NULL));
+                r = max(r, g.distance(p, g));
+            }
+
+            set<Point>* a = &C;
+            return make_tuple(g, r, a);
+        }
 
         // Function OutputInternalPage (
         // Cmra: a set of (m,r, a) tuples as returned from OutputLeafPage
