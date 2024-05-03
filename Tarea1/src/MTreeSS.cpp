@@ -58,7 +58,7 @@ class MTreeBySS {
                 r = max(r, dist(g, p));
             }
 
-            std::shared_ptr<Node> a = &C;
+            std::shared_ptr<Node> a = std::make_shared<Node>(C);
             return Entry(g, r, a);
         }
 
@@ -75,7 +75,7 @@ class MTreeBySS {
         tuple<Point, double, vector<tuple<Point, double, vector<Entry>*>>*> outputInternalPage(vector<tuple<Point, double, vector<Entry>*>> c_mra){
             
             // We need to calculate the primary medoid of the set of points Cin
-            Cluster C_in;
+            Cluster C_in(max_size);
             for (tuple<Point, double, vector<Entry>*> t : c_mra) {
                 C_in.points.push_back(get<0>(t));
             }
@@ -96,7 +96,7 @@ class MTreeBySS {
         Entry outputInternalPage2(vector<Entry> c_mra){
             
             // We need to calculate the primary medoid of the set of points Cin
-            Cluster C_in;
+            Cluster C_in(max_size);
             for (Entry e : c_mra) {
                 C_in.points.push_back(e.get_p());
             }
