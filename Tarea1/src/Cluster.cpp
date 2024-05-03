@@ -22,10 +22,10 @@ Cluster::Cluster(double max_size) :
 // Podria ir guardando los iteradores de los puntos en un set
 // Pensando que cada punto es una única instancia de Point, puedo guardar una tupla con ambos punteros
 // y las distancias en un set ordenado por distancia ayyy no se
-Point Cluster::set_primary_medoid() {
-    if (this->points.size() == 0) {
-        return Point();
-    }
+shared_ptr<Point> Cluster::set_primary_medoid() {
+    // if (this->points.size() == 0) {
+    //     return Point();
+    // }
     // double medoid_radius = this->radius;
     // Point medoid;
     for_each(this->points.begin(), this->points.end(), [this] (shared_ptr<Point> point) {
@@ -38,7 +38,7 @@ Point Cluster::set_primary_medoid() {
             this->primary_medoid = shared_ptr<Point>(point);
         }
     });
-    return *this->primary_medoid;
+    return shared_ptr<Point>(this->primary_medoid);
 }
 
 double Cluster::distance(Cluster cluster) {

@@ -25,7 +25,7 @@ class Cluster {
         // A cluster medoid is any point m in the cluster for which there exists no other
         // point p in the cluster that, if nominated as a medoid, would give the cluster
         // a radius less than that given by m.
-        Point set_primary_medoid();
+        shared_ptr<Point> set_primary_medoid();
 
         // The distance between two clusters is that between their primary medoids.
         double distance(Cluster cluster);
