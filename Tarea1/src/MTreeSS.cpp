@@ -34,21 +34,8 @@ class MTreeBySS {
         //     m is the primary medoid of Cin,
         //     r is called the covering radius,
         //     a is the disk address of the page output.
-        tuple<Point, double, vector<Entry>*> outputLeafPage(Cluster c_in){
-            Point g = c_in.set_primary_medoid();
-            double r = 0;
-            vector<Entry> C;
 
-            for (Point p : c_in.points) {
-                C.push_back(Entry(p, NULL, NULL));
-                r = max(r, dist(g, p));
-            }
-
-            vector<Entry>* a = &C;
-            return make_tuple(g, r, a);
-        }
-
-        Entry outputLeafPage2(Cluster c_in){
+        Entry outputLeafPage(Cluster c_in){
             Point g = c_in.set_primary_medoid();
             double r = 0;
             Node C(max_size);
@@ -72,28 +59,7 @@ class MTreeBySS {
         // points Cin = {m|∃(m,r, a) ∈ Cmra},
         // R is called the covering radius,
         // A is the disk address of the page output.
-        tuple<Point, double, vector<tuple<Point, double, vector<Entry>*>>*> outputInternalPage(vector<tuple<Point, double, vector<Entry>*>> c_mra){
-            
-            // We need to calculate the primary medoid of the set of points Cin
-            Cluster C_in(max_size);
-            for (tuple<Point, double, vector<Entry>*> t : c_mra) {
-                C_in.points.push_back(get<0>(t));
-            }
-            Point G = C_in.set_primary_medoid();
-
-            double R = 0;
-            vector<tuple<Point, double, vector<Entry>*>> C;
-
-            for (tuple<Point, double, vector<Entry>*> t : c_mra) {
-                C.push_back(t);
-                R = max(R, dist(G, get<0>(t)));
-            }
-
-            vector<tuple<Point, double, vector<Entry>*>>* A = &C;
-            return make_tuple(G, R, A);
-        }
-
-        Entry outputInternalPage2(vector<Entry> c_mra){
+        Entry outputInternalPage(vector<Entry> c_mra){
             
             // We need to calculate the primary medoid of the set of points Cin
             Cluster C_in(max_size);
