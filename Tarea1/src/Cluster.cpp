@@ -83,6 +83,42 @@ Cluster Cluster::merge(Cluster &cluster) {
     return merged_cluster;
 }
 
+// REVIEW THIS FUNCTION!!!!!!!!!!!!!!!!!!!!!!! *********
+pair<Cluster &, Cluster &> Cluster::split() {
+    Cluster cluster1 = Cluster(this->max_size);
+    Cluster cluster2 = Cluster(this->max_size);
+    // Insertion splitting policy
+    // For each point in the cluster, assign it to the cluster with the smallest radius
+    for_each(this->points.begin(), this->points.end(), [&cluster1, &cluster2] (shared_ptr<Point> point) {
+        if (cluster1.radius < cluster2.radius) {
+            cluster1.insert(shared_ptr<Point>(point));
+        } else {
+            cluster2.insert(shared_ptr<Point>(point));
+        }
+    });
+    return make_pair(ref(cluster1), ref(cluster2));
+}
+
+// REVIEW THIS FUNCTION!!!!!!!!!!!!!!!!!!!!!!! *********
+pair<pair<Cluster &, vector<Cluster>::iterator>, pair<Cluster &, vector<Cluster>::iterator>> closest_pair(vector<Cluster> clusters) {
+    pair<Cluster &, vector<Cluster>::iterator> cluster1_pair = make_pair(ref(clusters[0]), clusters.begin());
+    pair<Cluster &, vector<Cluster>::iterator> cluster2_pair = make_pair(ref(clusters[1]), clusters.begin() + 1);
+    double min_distance = cluster1_pair.first.distance(cluster2_pair.first);
+    for (vector<Cluster>::iterator cluster1_iter = clusters.begin(); cluster1_iter != clusters.end(); cluster1_iter++) {
+        Cluster &cluster1 = *cluster1_iter;
+        for (vector<Cluster>::iterator cluster2_iter = cluster1_iter + 1; cluster2_iter != clusters.end(); cluster2_iter++) {
+            Cluster &cluster2 = *cluster2_iter;
+            double distance = cluster1.distance(cluster2);
+            if (distance < min_distance) {
+                min_distance = distance;
+                cluster1_pair = make_pair(ref(cluster1), cluster1_iter);
+                cluster2_pair = make_pair(ref(cluster2), cluster2_iter);
+            }
+        }
+    }
+    return make_pair(cluster1_pair, cluster2_pair);
+}
+
 vector<Cluster> cluster(double max_size, vector<shared_ptr<Point>> points) {
     // First phase: converts the input set of points into a set of singleton clusters.
     // Let Cout = {} ;
