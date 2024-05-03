@@ -46,6 +46,12 @@ double Cluster::distance(Cluster cluster) {
     return dist(*this->primary_medoid, *(cluster.primary_medoid));
 }
 
+// Test proper insertion of points *******************
+void Cluster::insert(Point point) {
+    shared_ptr<Point> point_ptr = make_shared<Point>(point);
+    this->points.push_back(point_ptr);
+}
+
 vector<Cluster> cluster(double max_size, vector<Point> &points) {
     // First phase: converts the input set of points into a set of singleton clusters.
     // Let Cout = {} ;
