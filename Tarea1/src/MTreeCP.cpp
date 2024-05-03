@@ -115,45 +115,45 @@ void cpRedistribution(vector<Point>& samples, vector<vector<Point>>& F, double b
     }
 }
 
-// ## Paso 5) del metodo CP.
-//
-// Volver al paso 2 si el tamaño del conjunto F es igual a 1
-//
-// Returns:
-// 
-vector<vector<Point>> checkFSize(vector<vector<Point>>& F, double B) {
-    if (F.size() == 1) {
-        vector<Point> new_samples = selectRandomPoints(points, B);
-        vector<vector<Point>> new_F = nearestSample(points, new_samples);
-        cpRedistribution(new_samples, new_F, b);
-        return checkFSize(...);
-    }
-    return F;
+// // ## Paso 5) del metodo CP.
+// //
+// // Volver al paso 2 si el tamaño del conjunto F es igual a 1
+// //
+// // Returns:
+// // 
+// vector<vector<Point>> checkFSize(vector<vector<Point>>& F, double B) {
+//     if (F.size() == 1) {
+//         vector<Point> new_samples = selectRandomPoints(points, B);
+//         vector<vector<Point>> new_F = nearestSample(points, new_samples);
+//         cpRedistribution(new_samples, new_F, b);
+//         return checkFSize(...);
+//     }
+//     return F;
 
-}
+// }
 
-// ## Paso 6) del metodo CP
-// 
-// Se realiza recursivamente el algoritmo CP en cada Fj, obteniendo el arbol Tj
-void makeTjTrees() {
-
-}
-
-// Main
-int main() {
-    vector<Point> points = generateRandomPoints(15, 100);
-    vector<Point> samples = selectRandomPoints(points, 3);
-
-
-
-    vector<vector<Point>> nearestSamples = nearestSample(points, samples);
-    std::cout << nearestSamples << std::endl;
-
-    cpRedistribution(samples, nearestSamples, 3);
-
-    std::cout << "Post Distribucion:" << std::endl;
-    std::cout << samples << std::endl;
-    std::cout << nearestSamples << std::endl;
+// // ## Paso 6) del metodo CP
+// // 
+// // Se realiza recursivamente el algoritmo CP en cada Fj, obteniendo el arbol Tj
+// void makeTjTrees(vector<Point> user_P) {
     
-    return 0;
-}
+// }
+
+// // Main
+// int main() {
+//     vector<Point> points = generateRandomPoints(15, 100);
+//     vector<Point> samples = selectRandomPoints(points, 3);
+
+
+
+//     vector<vector<Point>> nearestSamples = nearestSample(points, samples);
+//     std::cout << nearestSamples << std::endl;
+
+//     cpRedistribution(samples, nearestSamples, 3);
+
+//     std::cout << "Post Distribucion:" << std::endl;
+//     std::cout << samples << std::endl;
+//     std::cout << nearestSamples << std::endl;
+    
+//     return 0;
+// }
