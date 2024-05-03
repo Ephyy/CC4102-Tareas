@@ -6,6 +6,7 @@ using namespace std;
 
 
 vector<Cluster> cluster(double max_size, vector<Point> &points) {
+    // First phase: converts the input set of points into a set of singleton clusters.
     // Let Cout = {} ;
     vector<Cluster> clusters_output;
     // Let C = {} ;
@@ -16,7 +17,7 @@ vector<Cluster> cluster(double max_size, vector<Point> &points) {
         clusters.push_back(singleton_cluster);
     });
 
-
+    // Second phase: work of clustering.
     while (clusters.size() > 1) {
         pair<pair<Cluster &, vector<Cluster>::iterator>, pair<Cluster &, vector<Cluster>::iterator>> closest_clusters = closest_pair(clusters);
         //  Get the values of the cluster and its iterator from the closest pair of clusters.
@@ -40,7 +41,9 @@ vector<Cluster> cluster(double max_size, vector<Point> &points) {
             clusters.erase(cluster1_iter);
         }
     }
-    // Let c be the last remaining element of C
+
+    // Third phase: if the last remeining element of C contains fewer than CMAX/2 points, its points and those
+    // of its nearest neighbour are reditributed to ensure that no cluster breaks the minimum size bound.
     Cluster last_cluster = clusters[0];
     Cluster neareast_cluster;
     if (clusters_output.size() > 0) {
