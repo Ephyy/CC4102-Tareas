@@ -16,11 +16,7 @@ class Cluster {
         // b
         double min_size;
 
-        Cluster() {
-            radius = 0;
-            max_size = 0;
-            min_size = 0;
-        }
+        Cluster(double max_size);
 
         // Obtains the primary medoid from the points in the cluster:
         // the least medoid of the cluster in this order.

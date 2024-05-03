@@ -3,6 +3,12 @@
 
 using namespace std;
 
+Cluster::Cluster(double max_size) {
+    this->max_size = max_size;
+    this->min_size = max_size / 2;
+    this->radius = 0;
+    this->points = vector<Point> ({});
+}
 
 
 vector<Cluster> cluster(double max_size, vector<Point> &points) {
@@ -11,8 +17,8 @@ vector<Cluster> cluster(double max_size, vector<Point> &points) {
     vector<Cluster> clusters_output;
     // Let C = {} ;
     vector<Cluster> clusters; 
-    for_each(points.begin(), points.end(), [&clusters] (Point point) {
-        Cluster singleton_cluster = Cluster();
+    for_each(points.begin(), points.end(), [&clusters, max_size] (Point point) {
+        Cluster singleton_cluster = Cluster(max_size);
         singleton_cluster.insert(point);
         clusters.push_back(singleton_cluster);
     });
@@ -45,7 +51,7 @@ vector<Cluster> cluster(double max_size, vector<Point> &points) {
     // Third phase: if the last remeining element of C contains fewer than CMAX/2 points, its points and those
     // of its nearest neighbour are reditributed to ensure that no cluster breaks the minimum size bound.
     Cluster last_cluster = clusters[0];
-    Cluster neareast_cluster;
+    Cluster neareast_cluster = Cluster(max_size);
     if (clusters_output.size() > 0) {
         // Let c' be a nearest neighbour of c in Cout
         pair<Cluster &, vector<Cluster>::iterator> neareast_cluster_pair = last_cluster.nearest_neighbour(clusters_output);
@@ -53,10 +59,11 @@ vector<Cluster> cluster(double max_size, vector<Point> &points) {
         vector<Cluster>::iterator neareast_cluster_iter = neareast_cluster_pair.second;
         // Remove c' from Cout
         clusters_output.erase(neareast_cluster_iter); // maybe neareast_cluster dissapears???
-    } else {
-        // Let c' = {};
-        neareast_cluster = Cluster();
-    }
+    } 
+    // else {
+    //     // Let c' = {};
+    //     neareast_cluster = Cluster(max_size);
+    // }
 
     Cluster &merged_cluster = last_cluster.merge(neareast_cluster);
     if (merged_cluster.size() <= max_size) {
