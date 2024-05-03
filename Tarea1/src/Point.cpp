@@ -20,6 +20,8 @@ double Point::get_y() {
     return y;
 }
 
+// Calcula la distancia entre dos puntos
+// Ej: dist(Point(1, 2), Point(5, 3))
 double dist(Point p, Point q)
 {   
     return sqrt(pow(p.get_x() - q.get_x(), 2) + pow(p.get_y() - q.get_y(), 2));
