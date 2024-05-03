@@ -41,6 +41,11 @@ Point Cluster::set_primary_medoid() {
     return *this->primary_medoid;
 }
 
+double Cluster::distance(Cluster cluster) {
+    // Assuming both clusters have set a primary medoid
+    return dist(*this->primary_medoid, *(cluster.primary_medoid));
+}
+
 vector<Cluster> cluster(double max_size, vector<Point> &points) {
     // First phase: converts the input set of points into a set of singleton clusters.
     // Let Cout = {} ;
