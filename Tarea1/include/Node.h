@@ -10,7 +10,7 @@ class Entry; // Forward declaration of the 'Entry' class
 
 class Node {
 private:
-    std::set<Entry> entries;
+    std::vector<Entry> entries;
     double b;
     double B;
 

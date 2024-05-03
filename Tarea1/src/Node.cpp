@@ -15,5 +15,5 @@ double Node::get_B() {
 }
 
 void Node::insert(Entry e) {
-    entries.insert(e);
+    entries.push_back(e);
 }

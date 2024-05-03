@@ -41,7 +41,7 @@ class MTreeBySS {
             Node C(max_size);
 
             for (Point p : c_in.points) {
-                C.insert(Entry(p, NULL, NULL));
+                C.insert(Entry(p, 0, nullptr));
                 r = max(r, dist(g, p));
             }
 
