@@ -45,9 +45,9 @@ int Cluster::size() {
 
 pair<Cluster &, vector<Cluster>::iterator> Cluster::nearest_neighbour(vector<Cluster> &clusters) {
     Cluster &nearest_cluster = clusters[0];
-    vector<Cluster>::iterator nearest_cluster_iter = clusters.begin();
+    auto nearest_cluster_iter = clusters.begin();
     double min_distance = this->distance(nearest_cluster);
-    for (vector<Cluster>::iterator cluster_iter = clusters.begin(); cluster_iter != clusters.end(); cluster_iter++) {
+    for (auto cluster_iter = clusters.begin(); cluster_iter != clusters.end(); cluster_iter++) {
         Cluster &current_cluster = *cluster_iter;
         double distance = this->distance(current_cluster);
         if (distance < min_distance) {
@@ -117,14 +117,13 @@ pair<Cluster, Cluster> Cluster::split() {
     return make_pair(cluster1, cluster2);
 }
 
-// REVIEW THIS FUNCTION!!!!!!!!!!!!!!!!!!!!!!! *********
 pair<pair<Cluster &, vector<Cluster>::iterator>, pair<Cluster &, vector<Cluster>::iterator>> closest_pair(vector<Cluster> &clusters) {
     pair<Cluster &, vector<Cluster>::iterator> cluster1_pair = make_pair(ref(clusters[0]), clusters.begin());
     pair<Cluster &, vector<Cluster>::iterator> cluster2_pair = make_pair(ref(clusters[1]), clusters.begin() + 1);
     double min_distance = cluster1_pair.first.distance(cluster2_pair.first);
-    for (vector<Cluster>::iterator cluster1_iter = clusters.begin(); cluster1_iter != clusters.end(); cluster1_iter++) {
+    for (auto cluster1_iter = clusters.begin(); cluster1_iter != clusters.end(); cluster1_iter++) {
         Cluster &cluster1 = *cluster1_iter;
-        for (vector<Cluster>::iterator cluster2_iter = cluster1_iter + 1; cluster2_iter != clusters.end(); cluster2_iter++) {
+        for (auto cluster2_iter = cluster1_iter + 1; cluster2_iter != clusters.end(); cluster2_iter++) {
             Cluster &cluster2 = *cluster2_iter;
             double distance = cluster1.distance(cluster2);
             if (distance < min_distance) {
