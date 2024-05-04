@@ -3,14 +3,6 @@
 
 using namespace std;
 
-// Cluster::Cluster(double max_size) {
-//     this->max_size = max_size;
-//     this->min_size = max_size / 2;
-//     this->radius = 0;
-//     this->points = ();
-//     // Point medoid = this->points[0]; // it this even ok??? is it garbage???
-//     this->primary_medoid = Point(); // gets a reference to the garbage???
-// }
 Cluster::Cluster(double max_size) : 
     max_size(max_size), 
     min_size(max_size / 2), 
@@ -23,11 +15,6 @@ Cluster::Cluster(double max_size) :
 // Pensando que cada punto es una única instancia de Point, puedo guardar una tupla con ambos punteros
 // y las distancias en un set ordenado por distancia ayyy no se
 shared_ptr<Point> Cluster::set_primary_medoid() {
-    // if (this->points.size() == 0) {
-    //     return Point();
-    // }
-    // double medoid_radius = this->radius;
-    // Point medoid;
     for_each(this->points.begin(), this->points.end(), [this] (shared_ptr<Point> point) {
         double max_radius = 0;
         for_each(this->points.begin(), this->points.end(), [&max_radius, point] (shared_ptr<Point> other_point) {
@@ -83,20 +70,51 @@ Cluster Cluster::merge(Cluster &cluster) {
     return merged_cluster;
 }
 
-// REVIEW THIS FUNCTION!!!!!!!!!!!!!!!!!!!!!!! *********
-pair<Cluster &, Cluster &> Cluster::split() {
+// MinMax split policy: Para cada par de puntos en el cluster:
+// 
+// 1. Escojo p1 y p2 como medoides de los clusters c1 y c2
+// 2. Agrego el p más cercano a p1 y guardo su distancia
+// 3. Agrego el p más cercano a p2 y guardo su distancia
+// 4. Repito 2 y 3 hasta que se acaben los puntos del cluster, 
+//    y el radio de cada cluster sería la distancía máxima 
+//    calculada en el proceso
+// 5. Guardo el radio mayor de los dos clusters
+// 6. Repito 1 para cada par de puntos p1 y p2 y se escoge el par
+//    con el radio menor
+pair<Cluster, Cluster> Cluster::split() {
+    // dado que creo los clusters adentro, dejo de existir cuando los retorno????? y con el merge?????
     Cluster cluster1 = Cluster(this->max_size);
     Cluster cluster2 = Cluster(this->max_size);
-    // Insertion splitting policy
-    // For each point in the cluster, assign it to the cluster with the smallest radius
-    for_each(this->points.begin(), this->points.end(), [&cluster1, &cluster2] (shared_ptr<Point> point) {
-        if (cluster1.radius < cluster2.radius) {
-            cluster1.insert(shared_ptr<Point>(point));
-        } else {
-            cluster2.insert(shared_ptr<Point>(point));
+    // since I need to minimize the radius, I will start with the maximum possible radius
+    double min_radius = this->radius; 
+    for(auto iter1 = this->points.begin(); iter1 != this->points.end(); iter1++) {
+        shared_ptr<Point> point1 = *iter1;
+        for(auto iter2 = iter1 + 1; iter2 != this->points.end(); iter2++) {
+            Cluster current_cluster1 = Cluster(this->max_size);
+            Cluster current_cluster2 = Cluster(this->max_size);
+            shared_ptr<Point> point2 = *iter2;
+            cluster1.primary_medoid = shared_ptr<Point>(point1);
+            cluster2.primary_medoid = shared_ptr<Point>(point2);
+            for_each(this->points.begin(), this->points.end(), [&current_cluster1, &current_cluster2] (shared_ptr<Point> point) {
+                double distance1 = dist(*point, *current_cluster1.primary_medoid);
+                double distance2 = dist(*point, *current_cluster2.primary_medoid);
+                if (distance1 < distance2) {
+                    current_cluster1.insert(point);
+                    current_cluster1.radius = max(current_cluster1.radius, distance1);
+                } else {
+                    current_cluster2.insert(point);
+                    current_cluster2.radius = max(current_cluster1.radius, distance2);
+                }
+            });
+            double max_radius = max(current_cluster1.radius, current_cluster2.radius);
+            if (max_radius < min_radius) {
+                min_radius = max_radius;
+                cluster1 = current_cluster1;
+                cluster2 = current_cluster2;
+            }
         }
-    });
-    return make_pair(ref(cluster1), ref(cluster2));
+    }
+    return make_pair(cluster1, cluster2);
 }
 
 // REVIEW THIS FUNCTION!!!!!!!!!!!!!!!!!!!!!!! *********
@@ -179,11 +197,11 @@ vector<Cluster> cluster(double max_size, vector<shared_ptr<Point>> points) {
         clusters_output.push_back(merged_cluster);
     } else {
         // Split c ∪ c' into c1 and c2 using the insertion splitting policy
-        pair<Cluster &, Cluster &> split_clusters = merged_cluster.split();
+        // tal vez mejor hacer que reciba las referencias de los clusters ya creados y los modifique*****
+        pair<Cluster, Cluster> split_clusters = merged_cluster.split();
         // Add c1 and c2 to Cout
         clusters_output.push_back(split_clusters.first);
         clusters_output.push_back(split_clusters.second);
     }
-
     return clusters_output;
 }
