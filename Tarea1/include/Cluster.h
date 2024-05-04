@@ -6,14 +6,22 @@
 
 using namespace std;
 
+// A cluster is a collection of points that may be accomodated within a single disk page
 class Cluster {
     public:
         // Ver si es mejor usar otra estructura de datos
         vector<shared_ptr<Point>> points;
+
+        // A cluster’s location is considered to be that of its medoid.
         shared_ptr<Point> primary_medoid;
+
+        // The cluster radius is the distance between the medoid and its furthest neighbour 
+        // in the cluster. The cluster boundary falls at this distance from the medoid.
         double radius;
+
         // B 
         double max_size; 
+        
         // b
         double min_size;
 
@@ -42,6 +50,7 @@ class Cluster {
         // Returns a NEW cluster that is the result of merging this cluster with another.
         Cluster merge(Cluster &cluster);
 
+        // MinMax split policy
         pair<Cluster &, Cluster &> split();
 };
 
