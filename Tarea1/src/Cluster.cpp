@@ -43,7 +43,7 @@ int Cluster::size() {
     return this->points.size();
 }
 
-pair<Cluster &, vector<Cluster>::iterator> Cluster::nearest_neighbour(vector<Cluster> clusters) {
+pair<Cluster &, vector<Cluster>::iterator> Cluster::nearest_neighbour(vector<Cluster> &clusters) {
     Cluster &nearest_cluster = clusters[0];
     vector<Cluster>::iterator nearest_cluster_iter = clusters.begin();
     double min_distance = this->distance(nearest_cluster);
@@ -118,7 +118,7 @@ pair<Cluster, Cluster> Cluster::split() {
 }
 
 // REVIEW THIS FUNCTION!!!!!!!!!!!!!!!!!!!!!!! *********
-pair<pair<Cluster &, vector<Cluster>::iterator>, pair<Cluster &, vector<Cluster>::iterator>> closest_pair(vector<Cluster> clusters) {
+pair<pair<Cluster &, vector<Cluster>::iterator>, pair<Cluster &, vector<Cluster>::iterator>> closest_pair(vector<Cluster> &clusters) {
     pair<Cluster &, vector<Cluster>::iterator> cluster1_pair = make_pair(ref(clusters[0]), clusters.begin());
     pair<Cluster &, vector<Cluster>::iterator> cluster2_pair = make_pair(ref(clusters[1]), clusters.begin() + 1);
     double min_distance = cluster1_pair.first.distance(cluster2_pair.first);
