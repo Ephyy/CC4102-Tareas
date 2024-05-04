@@ -21,7 +21,7 @@ class Cluster {
 
         // B 
         double max_size; 
-        
+
         // b
         double min_size;
 
@@ -51,7 +51,7 @@ class Cluster {
         Cluster merge(Cluster &cluster);
 
         // MinMax split policy
-        pair<Cluster &, Cluster &> split();
+        pair<Cluster, Cluster> split();
 };
 
 // Returns a pair of a pair with the cluster and its iterator from the closest pair of clusters.
