@@ -53,11 +53,11 @@ int Cluster::size() {
     return this->points.size();
 }
 
-pair<Cluster &, vector<Cluster>::iterator> Cluster::nearest_neighbour(vector<Cluster> &clusters) {
-    Cluster &nearest_cluster = clusters[0];
-    auto nearest_cluster_iter = clusters.begin();
-    double min_distance = this->distance(nearest_cluster);
+pair<Cluster, vector<Cluster>::iterator> Cluster::nearest_neighbour(vector<Cluster> &clusters) {
+    Cluster nearest_cluster = *this;
     Point this_point = *this->primary_medoid;
+    vector<Cluster>::iterator nearest_cluster_iter;
+    double min_distance = 100; // dado que se minimiza, parto con un maximo
     for (auto cluster_iter = clusters.begin(); cluster_iter != clusters.end(); cluster_iter++) {
         Cluster current_cluster = *cluster_iter;
         Point point = *current_cluster.primary_medoid;
@@ -71,7 +71,8 @@ pair<Cluster &, vector<Cluster>::iterator> Cluster::nearest_neighbour(vector<Clu
             nearest_cluster_iter = cluster_iter;
         }
     }
-    return make_pair(ref(nearest_cluster), nearest_cluster_iter);
+    cout << "--- (nearest_neighbour) --- distance: " << min_distance << endl;       
+    return make_pair(nearest_cluster, nearest_cluster_iter);
 }
 
 Cluster Cluster::merge(Cluster &cluster) {
@@ -133,23 +134,14 @@ pair<Cluster, Cluster> Cluster::split() {
     return make_pair(cluster1, cluster2);
 }
 
-pair<pair<Cluster &, vector<Cluster>::iterator>, pair<Cluster &, vector<Cluster>::iterator>> closest_pair(vector<Cluster> &clusters) {
-    pair<Cluster &, vector<Cluster>::iterator> cluster1_pair = make_pair(ref(clusters[0]), clusters.begin());
-    pair<Cluster &, vector<Cluster>::iterator> cluster2_pair = make_pair(ref(clusters[1]), clusters.begin() + 1);
+pair<pair<Cluster, vector<Cluster>::iterator>, pair<Cluster, vector<Cluster>::iterator>> closest_pair(vector<Cluster> &clusters) {
+    pair<Cluster, vector<Cluster>::iterator> cluster1_pair = make_pair(clusters[0], clusters.begin());
+    pair<Cluster, vector<Cluster>::iterator> cluster2_pair = make_pair(clusters[1], clusters.begin() + 1);
     double min_distance = 100; //= cluster1_pair.first.distance(cluster2_pair.first);
     for (auto cluster1_iter = clusters.begin(); cluster1_iter != clusters.end(); cluster1_iter++) {
         Cluster current_cluster1 = *cluster1_iter;
-        // for (auto cluster2_iter = cluster1_iter + 1; cluster2_iter != clusters.end(); cluster2_iter++) {
-        //     Cluster &cluster2 = *cluster2_iter;
-        //     double distance = cluster1.distance(cluster2);
-        //     if (distance < min_distance) {
-        //         min_distance = distance;
-        //         cluster1_pair = make_pair(ref(cluster1), cluster1_iter);
-        //         cluster2_pair = make_pair(ref(cluster2), cluster2_iter);
-        //     }
-        // }
-        pair<Cluster &, vector<Cluster>::iterator> current_cluster2_pair = current_cluster1.nearest_neighbour(clusters);
-        Cluster &current_cluster2 = current_cluster2_pair.first;
+        pair<Cluster, vector<Cluster>::iterator> current_cluster2_pair = current_cluster1.nearest_neighbour(clusters);
+        Cluster current_cluster2 = current_cluster2_pair.first;
         double distance = current_cluster1.distance(current_cluster2);
         if (distance < min_distance) {
             min_distance = distance;
@@ -160,6 +152,7 @@ pair<pair<Cluster &, vector<Cluster>::iterator>, pair<Cluster &, vector<Cluster>
     if (cluster1_pair.first.size() < cluster2_pair.first.size()) {
         return make_pair(cluster2_pair, cluster1_pair);
     }
+    cout << "--- (closest_pair) --- distance: " << min_distance << endl;       
     return make_pair(cluster1_pair, cluster2_pair);
 }
 
@@ -192,14 +185,14 @@ vector<Cluster> cluster_fun(double max_size, vector<shared_ptr<Point>> points) {
 
     // Second phase: work of clustering.
     while (clusters.size() > 1) {
-        pair<pair<Cluster &, vector<Cluster>::iterator>, pair<Cluster &, vector<Cluster>::iterator>> closest_clusters = closest_pair(clusters);
+        pair<pair<Cluster, vector<Cluster>::iterator>, pair<Cluster, vector<Cluster>::iterator>> closest_clusters = closest_pair(clusters);
 
         //  Get the values of the cluster and its iterator from the closest pair of clusters.
-        pair<Cluster &, vector<Cluster>::iterator> cluster1_pair = closest_clusters.first;
-        Cluster &cluster1 = cluster1_pair.first;
+        pair<Cluster, vector<Cluster>::iterator> cluster1_pair = closest_clusters.first;
+        Cluster cluster1 = cluster1_pair.first;
         vector<Cluster>::iterator cluster1_iter = cluster1_pair.second;
-        pair<Cluster &, vector<Cluster>::iterator> cluster2_pair = closest_clusters.second;
-        Cluster &cluster2 = cluster2_pair.first;
+        pair<Cluster, vector<Cluster>::iterator> cluster2_pair = closest_clusters.second;
+        Cluster cluster2 = cluster2_pair.first;
         vector<Cluster>::iterator cluster2_iter = cluster2_pair.second;
         cout << "Closest clusters: " << endl;
         cout << "Cluster 1: " << endl;
@@ -277,7 +270,7 @@ vector<Cluster> cluster_fun(double max_size, vector<shared_ptr<Point>> points) {
     Cluster neareast_cluster = Cluster(max_size);
     if (clusters_output.size() > 0) {
         // Let c' be a nearest neighbour of c in Cout
-        pair<Cluster &, vector<Cluster>::iterator> neareast_cluster_pair = last_cluster.nearest_neighbour(clusters_output);
+        pair<Cluster, vector<Cluster>::iterator> neareast_cluster_pair = last_cluster.nearest_neighbour(clusters_output);
         neareast_cluster = neareast_cluster_pair.first;
         vector<Cluster>::iterator neareast_cluster_iter = neareast_cluster_pair.second;
         // Remove c' from Cout
