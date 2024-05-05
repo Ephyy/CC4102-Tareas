@@ -136,9 +136,9 @@ pair<Cluster, Cluster> Cluster::split() {
 pair<pair<Cluster &, vector<Cluster>::iterator>, pair<Cluster &, vector<Cluster>::iterator>> closest_pair(vector<Cluster> &clusters) {
     pair<Cluster &, vector<Cluster>::iterator> cluster1_pair = make_pair(ref(clusters[0]), clusters.begin());
     pair<Cluster &, vector<Cluster>::iterator> cluster2_pair = make_pair(ref(clusters[1]), clusters.begin() + 1);
-    double min_distance = cluster1_pair.first.distance(cluster2_pair.first);
+    double min_distance = 100; //= cluster1_pair.first.distance(cluster2_pair.first);
     for (auto cluster1_iter = clusters.begin(); cluster1_iter != clusters.end(); cluster1_iter++) {
-        Cluster &current_cluster1 = *cluster1_iter;
+        Cluster current_cluster1 = *cluster1_iter;
         // for (auto cluster2_iter = cluster1_iter + 1; cluster2_iter != clusters.end(); cluster2_iter++) {
         //     Cluster &cluster2 = *cluster2_iter;
         //     double distance = cluster1.distance(cluster2);
@@ -153,7 +153,7 @@ pair<pair<Cluster &, vector<Cluster>::iterator>, pair<Cluster &, vector<Cluster>
         double distance = current_cluster1.distance(current_cluster2);
         if (distance < min_distance) {
             min_distance = distance;
-            cluster1_pair = make_pair(current_cluster1, cluster1_iter);
+            cluster1_pair = make_pair(*cluster1_iter, cluster1_iter);
             cluster2_pair = current_cluster2_pair;
         }
     }
@@ -214,25 +214,62 @@ vector<Cluster> cluster_fun(double max_size, vector<shared_ptr<Point>> points) {
                 cout << *p << endl;
             }
             cout << "Primary medoid of clusters before erased: " << endl;
+            // aquí ya está repetido el primary medoid
             for (Cluster c : clusters) {
                 cout << *c.primary_medoid << endl;
             }
             // Remove c1 and c2 from C
             clusters.erase(cluster1_iter);
             clusters.erase(cluster2_iter);
-            // Add c1 ∪ c2 to C
-            clusters.push_back(merged_cluster);
-            cout << "Primary medoid of clusters after erased: " << endl;
+            cout << "(1) -- Primary medoid of clusters after erased: " << endl;
             for (Cluster c : clusters) {
                 cout << *c.primary_medoid << endl;
             }
+            // Add c1 ∪ c2 to C
+            clusters.push_back(merged_cluster);
+            cout << "(2) -- Primary medoid of clusters after erased AND push of merged:" << endl;
+            for (Cluster c : clusters) {
+                cout << *c.primary_medoid << endl;
+            }
+
         } else {
+            cout << "Merge is greater than max size" << endl;
             // Add c1 to Cout
             clusters_output.push_back(Cluster(cluster1)); // maybe cluster1 dissapears???
             // Remove c1 from C 
             clusters.erase(cluster1_iter);
+            cout << "Primary medoid of clusters after erased: " << endl;
+            for (Cluster c : clusters) {
+                cout << *c.primary_medoid << endl;
+            }
+        }
+        cout << "Clusters output are: " << endl;
+        for (Cluster c : clusters_output) {
+            cout << "Cluster out is: " << endl;
+            for (shared_ptr<Point> p : c.points) {
+                cout << *p << endl;
+            }
+        }
+        cout << "General Clusters are: " << endl;
+        for (Cluster c : clusters) {
+            cout << "Genearl Cluster is: " << endl;
+            for (shared_ptr<Point> p : c.points) {
+                cout << *p << endl;
+            }
         }
     }
+
+    cout << "\n CLUSTERING DONE \n" << endl;
+    cout << "Clusters output: " << endl;
+    for (Cluster c : clusters_output) {
+        cout << "Cluster is: " << endl;
+        for (shared_ptr<Point> p : c.points) {
+            cout << *p << endl;
+        }
+    }
+
+    cout << "Clusters output size: " << clusters_output.size() << endl;
+    cout << "Clusters size: " << clusters.size() << endl;
 
     // Third phase: if the last remeining element of C contains fewer than CMAX/2 points, its points and those
     // of its nearest neighbour are reditributed to ensure that no cluster breaks the minimum size bound.
