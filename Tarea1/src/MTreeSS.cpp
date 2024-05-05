@@ -56,6 +56,15 @@ shared_ptr<Node> MTreeBySS::bulkLoad(double max_size, vector<shared_ptr<Point>> 
     }
 
     vector<Cluster> clusters_output = cluster_fun(max_size, points);
+    cout << "Clusters output  DONE, size: " << clusters_output.size() << endl;
+    for (Cluster c : clusters_output) {
+        cout << "Cluster is: " << endl;
+        for (shared_ptr<Point> p : c.points) {
+            cout << *p << endl;
+        }
+    }
+
+    // HASTA AQUI TODO BIEN EXCEPTO EL SPLIT POLICY!!!!!!!!-------------------------------------
     // Let C = {}, entries allocated
     vector<Entry> entries;
     for_each(clusters_output.begin(), clusters_output.end(), [&entries, this] (Cluster c) {

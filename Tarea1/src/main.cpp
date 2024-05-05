@@ -7,10 +7,8 @@
 
 using namespace std;
 
-int main()
-{
+int main() {
     std::cout << "TESTING" << std::endl;
-
 
     Point p = Point(1, 2);
     auto n1 = std::make_shared<Node>(2);
@@ -39,10 +37,19 @@ int main()
 
     cout << "Final M tree" << endl;
     cout << "Entries First Node: " << endl;
+    int i = 0;
     for (Entry e : mtree.node->get_entries()) {
+        int j = 0;
+        cout << "NODO i:" << i << endl;
         cout << e.get_p() << endl;
+        cout << "node i, j: " << i << j << endl;
+        for (Entry e2 : e.get_a()->get_entries()) {
+            cout << "node j:" << j << endl;
+            cout << e2.get_p() << endl;
+            j++;
+        }
+        i++;
     }
-
     return 0;
 }
 

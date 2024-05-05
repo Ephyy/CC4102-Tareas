@@ -70,7 +70,6 @@ pair<Cluster, vector<Cluster>::iterator> Cluster::nearest_neighbour(vector<Clust
             nearest_cluster_iter = cluster_iter;
         }
     }
-    cout << "--- (nearest_neighbour) --- distance: " << min_distance << endl;       
     return make_pair(nearest_cluster, nearest_cluster_iter);
 }
 
@@ -155,7 +154,6 @@ pair<pair<Cluster, vector<Cluster>::iterator>, pair<Cluster, vector<Cluster>::it
     if (cluster1_pair.first.size() < cluster2_pair.first.size()) {
         return make_pair(cluster2_pair, cluster1_pair);
     }
-    cout << "--- (closest_pair) --- distance: " << min_distance << endl;       
     return make_pair(cluster1_pair, cluster2_pair);
 }
 
@@ -261,6 +259,7 @@ vector<Cluster> cluster_fun(double max_size, vector<shared_ptr<Point>> points) {
         }
     }
 
+    // HASTA AQUÍ TODO BIEN Y VERIFICADOOOOOO
     cout << "\n CLUSTERING DONE \n" << endl;
     cout << "Clusters output: " << endl;
     for (Cluster c : clusters_output) {
@@ -273,17 +272,26 @@ vector<Cluster> cluster_fun(double max_size, vector<shared_ptr<Point>> points) {
     cout << "Clusters output size: " << clusters_output.size() << endl;
     cout << "Clusters size: " << clusters.size() << endl;
 
-    // Third phase: if the last remeining element of C contains fewer than CMAX/2 points, its points and those
-    // of its nearest neighbour are reditributed to ensure that no cluster breaks the minimum size bound.
+    // Third phase: if the last remeining element of C (clusters) contains fewer than CMAX/2 points, 
+    // its points and those of its nearest neighbour are reditributed to ensure that no cluster 
+    // breaks the minimum size bound.
     Cluster last_cluster = clusters[0];
     Cluster neareast_cluster = Cluster(max_size);
     if (clusters_output.size() > 0) {
         // Let c' be a nearest neighbour of c in Cout
         pair<Cluster, vector<Cluster>::iterator> neareast_cluster_pair = last_cluster.nearest_neighbour(clusters_output);
         neareast_cluster = neareast_cluster_pair.first;
+        cout << "Neareast cluster: " << endl;
+        for (shared_ptr<Point> p : neareast_cluster.points) {
+            cout << *p << endl;
+        }
         vector<Cluster>::iterator neareast_cluster_iter = neareast_cluster_pair.second;
         // Remove c' from Cout
         clusters_output.erase(neareast_cluster_iter); // maybe neareast_cluster dissapears???
+        cout << "Neareast cluster: (again) " << endl;
+        for (shared_ptr<Point> p : neareast_cluster.points) {
+            cout << *p << endl;
+        }
     } 
     // else {
     //     // Let c' = {};
@@ -291,14 +299,27 @@ vector<Cluster> cluster_fun(double max_size, vector<shared_ptr<Point>> points) {
     // }
 
     Cluster merged_cluster = last_cluster.merge(neareast_cluster);
+    cout << "Merged cluster: " << endl;
+    for (shared_ptr<Point> p : merged_cluster.points) {
+        cout << *p << endl;
+    }
     if (merged_cluster.size() <= max_size) {
         // Add c ∪ c' to Cout 
         clusters_output.push_back(merged_cluster);
     } else {
+        cout << "\n SPLIT POLICY !!!\n" << endl; 
         // Split c ∪ c' into c1 and c2 using the insertion splitting policy
         // tal vez mejor hacer que reciba las referencias de los clusters ya creados y los modifique*****
-        pair<Cluster, Cluster> split_clusters = merged_cluster.split();
+        pair<Cluster, Cluster> split_clusters = merged_cluster.split(); 
         // Add c1 and c2 to Cout
+        cout << "Cluster 1: " << endl;
+        for (shared_ptr<Point> p : split_clusters.first.points) {
+            cout << *p << endl;
+        }
+        cout << "Cluster 2: " << endl;
+        for (shared_ptr<Point> p : split_clusters.second.points) {
+            cout << *p << endl;
+        }
         clusters_output.push_back(split_clusters.first);
         clusters_output.push_back(split_clusters.second);
     }
