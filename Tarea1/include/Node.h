@@ -21,6 +21,7 @@ public:
     // Getters
     double get_b();
     double get_B();
+    std::vector<Entry> get_entries();
 
     void insert(Entry e);
 };
