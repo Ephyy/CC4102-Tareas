@@ -136,7 +136,7 @@ pair<pair<Cluster &, vector<Cluster>::iterator>, pair<Cluster &, vector<Cluster>
     return make_pair(cluster1_pair, cluster2_pair);
 }
 
-vector<Cluster> cluster(double max_size, vector<shared_ptr<Point>> points) {
+vector<Cluster> cluster_fun(double max_size, vector<shared_ptr<Point>> points) {
     // First phase: converts the input set of points into a set of singleton clusters.
     // Let Cout = {} ;
     vector<Cluster> clusters_output;

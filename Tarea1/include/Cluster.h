@@ -67,4 +67,4 @@ pair<pair<Cluster &, vector<Cluster>::iterator>, pair<Cluster &, vector<Cluster>
 // Arguments:
 //      CMAX: maximum acceptable cardinality of a cluster,
 //      Cin: a set of at least CMAX/2 points
-vector<Cluster> cluster(double CMAX, vector<Point> &c_in);
+vector<Cluster> cluster_fun(double max_size, vector<shared_ptr<Point>> points);
