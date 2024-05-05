@@ -4,6 +4,7 @@
 #include <math.h>
 #include <vector>
 #include <iostream>
+#include <compare>
 
 using namespace std;
 
@@ -19,6 +20,7 @@ struct Point {
     // Getters
     double get_x();
     double get_y();
+    bool operator==(const Point &p) const;
 };
 
 
