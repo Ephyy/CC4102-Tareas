@@ -2,7 +2,6 @@
 #include <vector>
 #include <algorithm>
 #include <cmath>
-#include "Node.h"
 #include "Cluster.h"
 
 using namespace std;

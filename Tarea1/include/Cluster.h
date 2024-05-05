@@ -3,6 +3,8 @@
 #include <utility>
 #include <memory>
 #include "Point.h"
+#include "Node.h"
+#include "Entry.h"
 
 using namespace std;
 

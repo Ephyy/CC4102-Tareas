@@ -1,5 +1,5 @@
-#include "Cluster.h"
 #include <algorithm>
+#include "Cluster.h"
 
 using namespace std;
 
