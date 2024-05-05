@@ -6,8 +6,9 @@ using namespace std;
 Cluster::Cluster(double max_size) : 
     max_size(max_size), 
     min_size(max_size / 2), 
-    radius(0), 
-    points() {
+    radius(0) {
+    this->points = vector<shared_ptr<Point>>({make_shared<Point>(Point(0, 0))});
+    this->primary_medoid = this->points[0];
 }
 
 // Think about an optimization for this function 
@@ -30,6 +31,9 @@ shared_ptr<Point> Cluster::set_primary_medoid() {
 
 double Cluster::distance(Cluster cluster) {
     // Assuming both clusters have set a primary medoid
+    if (*this->primary_medoid == Point(0, 0) || *cluster.primary_medoid == Point(0, 0)) {
+        cout << "Primary medoid not set" << endl;
+    }
     return dist(*this->primary_medoid, *(cluster.primary_medoid));
 }
 
