@@ -87,9 +87,9 @@ pair<Cluster, Cluster> Cluster::split() {
     Cluster cluster2 = Cluster(this->max_size);
     // since I need to minimize the radius, I will start with the maximum possible radius
     double min_radius = this->radius; 
-    for(auto iter1 = this->points.begin(); iter1 != this->points.end(); iter1++) {
+    for (auto iter1 = this->points.begin(); iter1 != this->points.end(); iter1++) {
         shared_ptr<Point> point1 = *iter1;
-        for(auto iter2 = iter1 + 1; iter2 != this->points.end(); iter2++) {
+        for (auto iter2 = iter1 + 1; iter2 != this->points.end(); iter2++) {
             Cluster current_cluster1 = Cluster(this->max_size);
             Cluster current_cluster2 = Cluster(this->max_size);
             shared_ptr<Point> point2 = *iter2;
