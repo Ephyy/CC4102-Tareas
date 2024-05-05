@@ -41,7 +41,12 @@ Entry MTreeBySS::outputInternalPage(vector<Entry> c_mra) {
 }
 
 shared_ptr<Node> MTreeBySS::bulkLoad(double max_size, vector<shared_ptr<Point>> points) {
+    cout << "Bulk loading..." << endl;
+    for (shared_ptr<Point> p : points) {
+        cout << *p << endl;
+    }
     if (points.size() <= max_size) {
+        cout << "Points size is less than or equal to max size" << endl;
         Cluster c_in(max_size);
         for (shared_ptr<Point> p : points) {
             c_in.insert(p);
