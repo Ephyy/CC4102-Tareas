@@ -67,7 +67,7 @@ class MTreeBySS {
 
             for (Entry e : c_mra) {
                 C.insert(e);
-                R = max(R, dist(G, e.get_p()));
+                R = max(R, dist(G, e.get_p()) + e.get_cr());
             }
             
             shared_ptr<Node> A = make_shared<Node>(C);
