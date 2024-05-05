@@ -2,12 +2,6 @@
 #include <vector>
 #include <algorithm>
 #include <cmath>
-#include <queue>
-#include <set>
-#include <map>
-#include <unordered_map>
-#include <unordered_set>
-#include <utility>
 #include "Node.h"
 #include "Cluster.h"
 
@@ -15,14 +9,12 @@ using namespace std;
 
 class MTreeBySS {
     public:
-        Node &root;
+        shared_ptr<Node> node;
         double max_size;
         double min_size;
 
-        MTreeBySS(double max_size, double min_size, Node &root) : root(root) {
-            this->max_size = max_size;
-            this->min_size = min_size;
-            // root = new MTreeNode();
+        MTreeBySS(double max_size) : max_size(max_size), min_size(max_size / 2) {
+            this->node = nullptr;
         }
 
         // Function OutputLeafPage(
@@ -131,5 +123,8 @@ class MTreeBySS {
             Entry entry = outputInternalPage(entries);
             return entry.get_a();
         }
-        
+
+        void set_node(vector<shared_ptr<Point>> points) {
+            this->node = bulkLoad(max_size, points);
+        }     
 };
