@@ -8,7 +8,6 @@ Cluster::Cluster(double max_size) :
     min_size(max_size / 2), 
     radius(0), 
     points() {
-    this->primary_medoid = make_shared<Point>(Point(0, 0));
 }
 
 // Think about an optimization for this function 
@@ -103,15 +102,15 @@ pair<Cluster, Cluster> Cluster::split() {
     Cluster cluster1 = Cluster(this->max_size);
     Cluster cluster2 = Cluster(this->max_size);
     // since I need to minimize the radius, I will start with the maximum possible radius
-    double min_radius = this->radius; 
+    double min_radius = 100; 
     for (auto iter1 = this->points.begin(); iter1 != this->points.end(); iter1++) {
         shared_ptr<Point> point1 = *iter1;
         for (auto iter2 = iter1 + 1; iter2 != this->points.end(); iter2++) {
+            shared_ptr<Point> point2 = *iter2;
             Cluster current_cluster1 = Cluster(this->max_size);
             Cluster current_cluster2 = Cluster(this->max_size);
-            shared_ptr<Point> point2 = *iter2;
-            cluster1.primary_medoid = shared_ptr<Point>(point1);
-            cluster2.primary_medoid = shared_ptr<Point>(point2);
+            current_cluster1.primary_medoid = shared_ptr<Point>(point1);
+            current_cluster2.primary_medoid = shared_ptr<Point>(point2);
             for_each(this->points.begin(), this->points.end(), [&current_cluster1, &current_cluster2] (shared_ptr<Point> point) {
                 double distance1 = dist(*point, *current_cluster1.primary_medoid);
                 double distance2 = dist(*point, *current_cluster2.primary_medoid);
