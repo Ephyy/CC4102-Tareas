@@ -74,7 +74,7 @@ pair<Cluster, vector<Cluster>::iterator> Cluster::nearest_neighbour(vector<Clust
     return make_pair(nearest_cluster, nearest_cluster_iter);
 }
 
-Cluster Cluster::merge(Cluster &cluster) {
+Cluster Cluster::merge(Cluster cluster) {
     Cluster merged_cluster = Cluster(this->max_size);
     for_each(this->points.begin(), this->points.end(), [&merged_cluster] (shared_ptr<Point> point) {
         merged_cluster.insert(shared_ptr<Point>(point));
@@ -133,6 +133,10 @@ pair<Cluster, Cluster> Cluster::split() {
     return make_pair(cluster1, cluster2);
 }
 
+bool Cluster::operator==(const Cluster &cluster) const {
+    return this->primary_medoid == cluster.primary_medoid;
+}
+
 pair<pair<Cluster, vector<Cluster>::iterator>, pair<Cluster, vector<Cluster>::iterator>> closest_pair(vector<Cluster> &clusters) {
     pair<Cluster, vector<Cluster>::iterator> cluster1_pair = make_pair(clusters[0], clusters.begin());
     pair<Cluster, vector<Cluster>::iterator> cluster2_pair = make_pair(clusters[1], clusters.begin() + 1);
@@ -184,6 +188,7 @@ vector<Cluster> cluster_fun(double max_size, vector<shared_ptr<Point>> points) {
 
     // Second phase: work of clustering.
     while (clusters.size() > 1) {
+        cout << "\n WHILE CLUSTERING LOOP \n" << endl;
         pair<pair<Cluster, vector<Cluster>::iterator>, pair<Cluster, vector<Cluster>::iterator>> closest_clusters = closest_pair(clusters);
 
         //  Get the values of the cluster and its iterator from the closest pair of clusters.
@@ -211,7 +216,11 @@ vector<Cluster> cluster_fun(double max_size, vector<shared_ptr<Point>> points) {
                 cout << *c.primary_medoid << endl;
             }
             // Remove c1 and c2 from C
-            clusters.erase(cluster1_iter);
+            cout << "SE BORRA (1): " << *(*cluster1_iter).primary_medoid << endl;
+            clusters.erase(cluster1_iter); 
+            // iter 2 se vuelve basura
+            auto cluster2_iter = find(clusters.begin(), clusters.end(), cluster2);
+            cout << "SE BORRA (2): " << *(*cluster2_iter).primary_medoid << endl;
             clusters.erase(cluster2_iter);
             cout << "(1) -- Primary medoid of clusters after erased: " << endl;
             for (Cluster c : clusters) {
@@ -225,8 +234,9 @@ vector<Cluster> cluster_fun(double max_size, vector<shared_ptr<Point>> points) {
             }
 
         } else {
-            cout << "Merge is greater than max size" << endl;
-            // Add c1 to Cout
+            cout << "\n Merge is GREATER than max size" << endl;
+            // Add c1 to Cout: el c1, que era el mayor de ambos, está listo para ser añadido
+            cout << "Cluster added size: " << cluster1.size() << endl;
             clusters_output.push_back(Cluster(cluster1)); // maybe cluster1 dissapears???
             // Remove c1 from C 
             clusters.erase(cluster1_iter);

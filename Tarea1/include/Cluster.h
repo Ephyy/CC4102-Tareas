@@ -50,10 +50,12 @@ class Cluster {
         pair<Cluster, vector<Cluster>::iterator> nearest_neighbour(vector<Cluster> &clusters);
 
         // Returns a NEW cluster that is the result of merging this cluster with another.
-        Cluster merge(Cluster &cluster);
+        Cluster merge(Cluster cluster);
 
         // MinMax split policy
         pair<Cluster, Cluster> split();
+
+        bool operator==(const Cluster &cluster) const;
 };
 
 // Returns a pair of a pair with the cluster and its iterator from the closest pair of clusters.
