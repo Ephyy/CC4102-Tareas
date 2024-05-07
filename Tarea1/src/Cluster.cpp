@@ -96,40 +96,98 @@ Cluster Cluster::merge(Cluster cluster) {
 // 5. Guardo el radio mayor de los dos clusters
 // 6. Repito 1 para cada par de puntos p1 y p2 y se escoge el par
 //    con el radio menor
+// ----------------
+// Varios puntos:
+// -elijo dos
+// le agrego el más cercano p1
+// le agrego el más cercano p2
+// no debería ser más de 2B 
 pair<Cluster, Cluster> Cluster::split() {
-    // dado que creo los clusters adentro, dejo de existir cuando los retorno????? y con el merge?????
-    Cluster cluster1 = Cluster(this->max_size);
-    Cluster cluster2 = Cluster(this->max_size);
     // since I need to minimize the radius, I will start with the maximum possible radius
+    Cluster final_cluster1 = Cluster(this->max_size);
+    Cluster final_cluster2 = Cluster(this->max_size);
     double min_radius = 100; 
     for (auto iter1 = this->points.begin(); iter1 != this->points.end(); iter1++) {
-        shared_ptr<Point> point1 = *iter1;
+        Cluster cluster1 = Cluster(this->max_size);
+        shared_ptr<Point> medoid1_ptr = shared_ptr<Point>(*iter1); // obtengo su medoide
+        cluster1.insert(medoid1_ptr); // lo inserto
+        cluster1.primary_medoid = medoid1_ptr; // lo seteo
+        vector<pair<double, shared_ptr<Point>>> distances1;
+        for_each(this->points.begin(), this->points.end(), [&distances1, &cluster1] (shared_ptr<Point> point) {
+            Point point_to_compare = *point;
+            double distance = dist(*cluster1.primary_medoid, point_to_compare);
+            if (point_to_compare == *cluster1.primary_medoid) {
+                return;
+            }
+            distances1.push_back(make_pair(distance, shared_ptr<Point>(point)));
+        });
+        sort(distances1.begin(), distances1.end());
+
         for (auto iter2 = iter1 + 1; iter2 != this->points.end(); iter2++) {
-            shared_ptr<Point> point2 = *iter2;
-            Cluster current_cluster1 = Cluster(this->max_size);
-            Cluster current_cluster2 = Cluster(this->max_size);
-            current_cluster1.primary_medoid = shared_ptr<Point>(point1);
-            current_cluster2.primary_medoid = shared_ptr<Point>(point2);
-            for_each(this->points.begin(), this->points.end(), [&current_cluster1, &current_cluster2] (shared_ptr<Point> point) {
-                double distance1 = dist(*point, *current_cluster1.primary_medoid);
-                double distance2 = dist(*point, *current_cluster2.primary_medoid);
-                if (distance1 < distance2) {
-                    current_cluster1.insert(point);
-                    current_cluster1.radius = max(current_cluster1.radius, distance1);
-                } else {
-                    current_cluster2.insert(point);
-                    current_cluster2.radius = max(current_cluster1.radius, distance2);
+            vector<pair<double, shared_ptr<Point>>> distances1_copy = distances1;
+            Cluster cluster2 = Cluster(this->max_size);
+            shared_ptr<Point> medoid2_ptr = shared_ptr<Point>(*iter2);
+            cluster2.insert(medoid2_ptr);
+            cluster2.primary_medoid = medoid2_ptr;
+            vector<pair<double, shared_ptr<Point>>> distances2;
+            for_each(this->points.begin(), this->points.end(), [&distances2, &cluster2] (shared_ptr<Point> point) {
+                Point point_to_compare = *point;
+                double distance = dist(*cluster2.primary_medoid, point_to_compare);
+                if (point_to_compare == *cluster2.primary_medoid) {
+                    return;
                 }
+                distances2.push_back(make_pair(distance, shared_ptr<Point>(point)));
             });
-            double max_radius = max(current_cluster1.radius, current_cluster2.radius);
-            if (max_radius < min_radius) {
-                min_radius = max_radius;
-                cluster1 = current_cluster1;
-                cluster2 = current_cluster2;
+            sort(distances2.begin(), distances2.end());
+            distances1_copy.erase(find_if(distances1_copy.begin(), distances1_copy.end(), [&medoid2_ptr] (pair<double, shared_ptr<Point>> p) {
+                return *p.second == *medoid2_ptr;
+            }));
+            distances2.erase(find_if(distances2.begin(), distances2.end(), [&medoid1_ptr] (pair<double, shared_ptr<Point>> p) {
+                return *p.second == *medoid1_ptr;
+            }));
+            // Alterno agregando los puntos más cercanos a cada medoide
+            while (distances1_copy.size() > 0 && distances2.size() > 0) {
+                // Agrego el más cercano a medoid1
+                shared_ptr<Point> closest_to_medoid1 = distances1_copy[0].second;
+                // Actualizo el radio de cluster1
+                if (distances1_copy[0].first > cluster1.radius) {
+                    cluster1.radius = distances1_copy[0].first;
+                }
+                cluster1.insert(closest_to_medoid1);
+                // Borro el que inserté
+                distances1_copy.erase(distances1_copy.begin()); 
+                distances2.erase(find_if(distances2.begin(), distances2.end(), [&closest_to_medoid1] (pair<double, shared_ptr<Point>> p) {
+                    return *p.second == *closest_to_medoid1;
+                }));
+
+                if (distances1_copy.size() == 0 || distances2.size() == 0) {
+                    break;
+                }
+            
+                // Agrego el más cercano a medoid2
+                shared_ptr<Point> closest_to_medoid2 = distances2[0].second;
+                // Actualizo el radio de cluster2
+                if (distances2[0].first > cluster2.radius) {
+                    cluster2.radius = distances2[0].first;
+                }
+                cluster2.insert(closest_to_medoid2);
+                // Borro el que inserté
+                distances2.erase(distances2.begin());
+                distances1_copy.erase(find_if(distances1_copy.begin(), distances1_copy.end(), [&closest_to_medoid2] (pair<double, shared_ptr<Point>> p) {
+                    return *p.second == *closest_to_medoid2;
+                }));
+            }
+
+            // Tengo la división de los puntos en dos clusters y sus radios
+            if (max(cluster1.radius, cluster2.radius) < min_radius) {
+                min_radius = max(cluster1.radius, cluster2.radius);
+                cout << "Min radius: " << min_radius << endl;
+                final_cluster1 = cluster1;
+                final_cluster2 = cluster2;
             }
         }
     }
-    return make_pair(cluster1, cluster2);
+    return make_pair(final_cluster1, final_cluster2);
 }
 
 bool Cluster::operator==(const Cluster &cluster) const {
