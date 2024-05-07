@@ -10,17 +10,16 @@ MTreeBySS::MTreeBySS(double max_size) : max_size(max_size), min_size(max_size / 
 // the radious is the maximum distance from the primary medoid to any point in the node to
 // which it a points to.
 Entry MTreeBySS::outputLeafPage(Cluster cluster_input) {
-    Point medoide = *cluster_input.set_primary_medoid();
+    Point medoid = *cluster_input.set_primary_medoid();
     double radius = 0;
     Node node_C(max_size);
-
     for (shared_ptr<Point> point_ptr : cluster_input.points) {
         node_C.insert(Entry(*point_ptr, 0, nullptr));
-        radius = max(radius, dist(medoide, *point_ptr));
+        radius = max(radius, dist(medoid, *point_ptr));
     }
 
     shared_ptr<Node> a = make_shared<Node>(node_C);
-    return Entry(medoide, radius, a);
+    return Entry(medoid, radius, a);
 }
 
 // entries_cmra son entradas que outputLeafPage ha devuelto en algún momento
@@ -34,6 +33,7 @@ Entry MTreeBySS::outputInternalPage(vector<Entry> entries_cmra) {
     for (Entry e : entries_cmra) {
         cluster_input.insert(make_shared<Point>(e.get_p()));
     }
+
     Point medoid = *cluster_input.set_primary_medoid();
     double radius = 0;
     Node interal_node_C(max_size);
@@ -48,12 +48,9 @@ Entry MTreeBySS::outputInternalPage(vector<Entry> entries_cmra) {
 
 shared_ptr<Node> MTreeBySS::bulkLoad(double max_size, vector<shared_ptr<Point>> points) {
     cout << "Bulk loading..." << endl;
-    for (shared_ptr<Point> p : points) {
-        cout << *p << endl;
-    }
+
     // Todos los puntos caben en un mismo nodo
     if (points.size() <= max_size) {
-        cout << "Points size is less than or equal to max size" << endl;
         Cluster cluster_input(max_size);
         for (shared_ptr<Point> p : points) {
             cluster_input.insert(p);
@@ -71,8 +68,6 @@ shared_ptr<Node> MTreeBySS::bulkLoad(double max_size, vector<shared_ptr<Point>> 
             cout << *p << endl;
         }
     }
-
-    // HASTA AQUI TODO BIEN EXCEPTO EL SPLIT POLICY!!!!!!!!-------------------------------------
 
     // Let C = {}, entries allocated
     vector<Entry> entries;

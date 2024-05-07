@@ -213,9 +213,7 @@ pair<pair<Cluster, vector<Cluster>::iterator>, pair<Cluster, vector<Cluster>::it
 
 vector<Cluster> cluster_fun(double max_size, vector<shared_ptr<Point>> points) {
     cout << "Clustering..." << endl;
-    for (shared_ptr<Point> p : points) {
-        cout << *p << endl;
-    }
+
     // First phase: converts the input set of points into a set of singleton clusters.
     // Let Cout = {} ;
     vector<Cluster> clusters_output;
@@ -230,7 +228,6 @@ vector<Cluster> cluster_fun(double max_size, vector<shared_ptr<Point>> points) {
 
     // Second phase: work of clustering.
     while (clusters.size() > 1) {
-        cout << "\n WHILE CLUSTERING LOOP \n" << endl;
         pair<pair<Cluster, vector<Cluster>::iterator>, pair<Cluster, vector<Cluster>::iterator>> closest_clusters = closest_pair(clusters);
 
         //  Get the values of the cluster and its iterator from the closest pair of clusters.
@@ -243,7 +240,7 @@ vector<Cluster> cluster_fun(double max_size, vector<shared_ptr<Point>> points) {
 
         if (cluster1.size() + cluster2.size() <= max_size) {
             Cluster merged_cluster = cluster1.merge(cluster2);
-            
+
             // Remove c1 and c2 from C
             clusters.erase(cluster1_iter); 
             auto cluster2_iter = find(clusters.begin(), clusters.end(), cluster2);
@@ -252,30 +249,11 @@ vector<Cluster> cluster_fun(double max_size, vector<shared_ptr<Point>> points) {
             // Add c1 ∪ c2 to C
             clusters.push_back(merged_cluster);
         } else {
-            cout << "\n Merge is GREATER than max size" << endl;
             // Add c1 to Cout: el c1, que era el mayor de ambos, está listo para ser añadido
-            cout << "Cluster added size: " << cluster1.size() << endl;
-            clusters_output.push_back(Cluster(cluster1)); // maybe cluster1 dissapears???
+            clusters_output.push_back(Cluster(cluster1)); 
+
             // Remove c1 from C 
             clusters.erase(cluster1_iter);
-            cout << "Primary medoid of clusters after erased: " << endl;
-            for (Cluster c : clusters) {
-                cout << *c.primary_medoid << endl;
-            }
-        }
-        cout << "Clusters output are: " << endl;
-        for (Cluster c : clusters_output) {
-            cout << "Cluster out is: " << endl;
-            for (shared_ptr<Point> p : c.points) {
-                cout << *p << endl;
-            }
-        }
-        cout << "General Clusters are: " << endl;
-        for (Cluster c : clusters) {
-            cout << "Genearl Cluster is: " << endl;
-            for (shared_ptr<Point> p : c.points) {
-                cout << *p << endl;
-            }
         }
     }
 
@@ -301,17 +279,10 @@ vector<Cluster> cluster_fun(double max_size, vector<shared_ptr<Point>> points) {
         // Let c' be a nearest neighbour of c in Cout
         pair<Cluster, vector<Cluster>::iterator> neareast_cluster_pair = last_cluster.nearest_neighbour(clusters_output);
         neareast_cluster = neareast_cluster_pair.first;
-        cout << "Neareast cluster: " << endl;
-        for (shared_ptr<Point> p : neareast_cluster.points) {
-            cout << *p << endl;
-        }
         vector<Cluster>::iterator neareast_cluster_iter = neareast_cluster_pair.second;
+
         // Remove c' from Cout
         clusters_output.erase(neareast_cluster_iter); // maybe neareast_cluster dissapears???
-        cout << "Neareast cluster: (again) " << endl;
-        for (shared_ptr<Point> p : neareast_cluster.points) {
-            cout << *p << endl;
-        }
     } 
     // else {
     //     // Let c' = {};
@@ -319,24 +290,19 @@ vector<Cluster> cluster_fun(double max_size, vector<shared_ptr<Point>> points) {
     // }
 
     Cluster merged_cluster = last_cluster.merge(neareast_cluster);
-    cout << "Merged cluster: " << endl;
-    for (shared_ptr<Point> p : merged_cluster.points) {
-        cout << *p << endl;
-    }
     if (merged_cluster.size() <= max_size) {
         // Add c ∪ c' to Cout 
         clusters_output.push_back(merged_cluster);
     } else {
-        cout << "\n SPLIT POLICY !!!\n" << endl; 
         // Split c ∪ c' into c1 and c2 using the insertion splitting policy
         // tal vez mejor hacer que reciba las referencias de los clusters ya creados y los modifique*****
         pair<Cluster, Cluster> split_clusters = merged_cluster.split(); 
         // Add c1 and c2 to Cout
-        cout << "Cluster 1: " << endl;
+        cout << "Cluster split 1: " << endl;
         for (shared_ptr<Point> p : split_clusters.first.points) {
             cout << *p << endl;
         }
-        cout << "Cluster 2: " << endl;
+        cout << "Cluster split 2: " << endl;
         for (shared_ptr<Point> p : split_clusters.second.points) {
             cout << *p << endl;
         }
