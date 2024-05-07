@@ -28,12 +28,12 @@ double dist(Point p, Point q)
 }
 
 
-// Generate n random points in the range [-range, range]
+// Generate n random points in the range [0, range]
 vector<Point> generateRandomPoints(int n, double range) {
     std::vector<Point> points;
     std::random_device rd; // Seed
     std::mt19937 gen(rd()); // Random number generator
-    std::uniform_real_distribution<double> dis(-range, range);  
+    std::uniform_real_distribution<double> dis(0, range);  
 
     for (int i = 0; i < n; i++) {
         double x = dis(gen);
