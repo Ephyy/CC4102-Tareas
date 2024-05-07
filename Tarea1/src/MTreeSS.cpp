@@ -51,16 +51,18 @@ shared_ptr<Node> MTreeBySS::bulkLoad(double max_size, vector<shared_ptr<Point>> 
     for (shared_ptr<Point> p : points) {
         cout << *p << endl;
     }
+    // Todos los puntos caben en un mismo nodo
     if (points.size() <= max_size) {
         cout << "Points size is less than or equal to max size" << endl;
-        Cluster c_in(max_size);
+        Cluster cluster_input(max_size);
         for (shared_ptr<Point> p : points) {
-            c_in.insert(p);
+            cluster_input.insert(p);
         }
-        Entry entry = outputLeafPage(c_in);
+        Entry entry = outputLeafPage(cluster_input);
         return entry.get_a();
     }
 
+    // Clusterizo los puntos
     vector<Cluster> clusters_output = cluster_fun(max_size, points);
     cout << "Clusters output  DONE, size: " << clusters_output.size() << endl;
     for (Cluster c : clusters_output) {
@@ -71,46 +73,57 @@ shared_ptr<Node> MTreeBySS::bulkLoad(double max_size, vector<shared_ptr<Point>> 
     }
 
     // HASTA AQUI TODO BIEN EXCEPTO EL SPLIT POLICY!!!!!!!!-------------------------------------
+
     // Let C = {}, entries allocated
     vector<Entry> entries;
+    // Por cada cluster, creo una entrada que apunta a un nodo que contiene los puntos del cluster
     for_each(clusters_output.begin(), clusters_output.end(), [&entries, this] (Cluster c) {
         // Add OutputLeafPage(c) to C
         entries.push_back(outputLeafPage(c));
     });
+
+    // Mientras las entradas no quepan en un mismo nado, clusterizo los puntos de las entradas
+    // y repito colocándolas en un nuevo nodo
     while (entries.size() > max_size) {
-        // Let Cin = {m|(m, r,a) ∈ C}
-        vector<shared_ptr<Point>> new_points;
+        // Let Cin = {m|(m, r, a) ∈ C}
+        vector<shared_ptr<Point>> medoids_of_clusters;
         for (Entry e : entries) {
-            new_points.push_back(make_shared<Point>(e.get_p())); // make_shared llama a uno nuevo
+            medoids_of_clusters.push_back(make_shared<Point>(e.get_p()));
         }
-        // Let Cout = Cluster(Cin, CMAX)
-        vector<Cluster> clusters_output = cluster_fun(max_size, new_points);
+
+        // Let Cout = Cluster(Cin, CMAX), clusterizo los medoides
+        vector<Cluster> clusters_output = cluster_fun(max_size, medoids_of_clusters);
+
         // Let Cmra = {}
-        vector<Entry> entries_mra;
-        for_each(clusters_output.begin(), clusters_output.end(), [&entries_mra, &entries, this] (Cluster cluster) {
-            // Let s = {(m, r, a)|(m, r, a) ∈ C ∧ m ∈ c} 
-            // todas las entradas que están en entries (C) y que su punto está en el cluster c
-            for_each(entries.begin(), entries.end(), [&entries_mra, &cluster] (Entry entry) {
-                auto it = find_if(cluster.points.begin(), cluster.points.end(), [&entry] (shared_ptr<Point> point) {
+        vector<vector<Entry>> entries_for_each_cluster_Cmra;
+        for_each(clusters_output.begin(), clusters_output.end(), [&entries_for_each_cluster_Cmra, &entries, this] (Cluster cluster) {
+            // Let s = {(m, r, a)|(m, r, a) ∈ C (la entrada está en `entries`) ∧ m ∈ c (su punto está en `cluster`)} 
+            // eso es, entradas correspondientes a este cluster
+            vector<Entry> entries_by_cluster_s;
+            for_each(cluster.points.begin(), cluster.points.end(), [&entries_by_cluster_s, &entries] (shared_ptr<Point> point) {
+                auto it = find_if(entries.begin(), entries.end(), [&point] (Entry entry) {
                     return entry.get_p() == *point;
                 });
-                if (it != cluster.points.end()) {
-                    entries_mra.push_back(entry);
+                if (it != entries.end()) {
+                    entries_by_cluster_s.push_back(*it);  // coloco la entrada, se copiará la entrada en el vector???
                 }
             });
+            entries_for_each_cluster_Cmra.push_back(entries_by_cluster_s);
         });
-        
-        // vector<Entry> new_entries;
-        // new_entries.push_back(outputInternalPage(entries_mra));
+
         // Let C = {} ;
         entries.clear();
+
         // For each s ∈ Cmra
-        //     Add OutputInternalPage(s) to C ; --> no entiendo bien a que se refiere???
-        entries.push_back(outputInternalPage(entries_mra));
+        //     Add OutputInternalPage(s) to C ; 
+        for_each(entries_for_each_cluster_Cmra.begin(), entries_for_each_cluster_Cmra.end(), [&entries, this] (vector<Entry> entries_s) {
+            entries.push_back(outputInternalPage(entries_s));
+        });
     }
+
     // Let (m, r, a) = OutputInternalPage(C)
-    Entry entry = outputInternalPage(entries);
-    return entry.get_a();
+    Entry final_entry = outputInternalPage(entries);
+    return final_entry.get_a();
 }
 
 void MTreeBySS::set_node(vector<shared_ptr<Point>> points) {
