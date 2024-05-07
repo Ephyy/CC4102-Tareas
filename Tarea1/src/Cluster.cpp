@@ -17,7 +17,6 @@ Cluster::Cluster(double max_size) :
 shared_ptr<Point> Cluster::set_primary_medoid() {
     if (this->points.size() == 1) {
         this->primary_medoid = shared_ptr<Point>(this->points[0]);
-        cout << "Primary medoid set to: " << *this->primary_medoid << endl;
         return shared_ptr<Point>(this->primary_medoid);
     }
     for_each(this->points.begin(), this->points.end(), [this] (shared_ptr<Point> point) {
@@ -30,15 +29,11 @@ shared_ptr<Point> Cluster::set_primary_medoid() {
             this->primary_medoid = shared_ptr<Point>(point);
         }
     });
-    cout << "Primary medoid set to: " << *this->primary_medoid << endl;
     return shared_ptr<Point>(this->primary_medoid);
 }
 
 double Cluster::distance(Cluster cluster) {
     // Assuming both clusters have set a primary medoid
-    if (*this->primary_medoid == Point(0, 0) || *cluster.primary_medoid == Point(0, 0)) {
-        cout << "Primary medoid not set" << endl;
-    }
     return dist(*this->primary_medoid, *(cluster.primary_medoid));
 }
 
@@ -188,16 +183,6 @@ pair<Cluster, Cluster> Cluster::split() {
             }
         }
     }
-    cout << "\n CLUSTERS FINALES \n " << endl;
-    cout << "Cluster 1: " << endl;
-    for (shared_ptr<Point> p : final_cluster1.points) {
-        cout << *p << endl;
-    }
-    cout << "Cluster 2: " << endl;
-    for (shared_ptr<Point> p : final_cluster2.points) {
-        cout << *p << endl;
-    }
-    cout << "--- FIN SPLIT ---" << endl;
     return make_pair(final_cluster1, final_cluster2);
 }
 
@@ -243,16 +228,6 @@ vector<Cluster> cluster_fun(double max_size, vector<shared_ptr<Point>> points) {
         clusters.push_back(singleton_cluster);
     });
 
-    cout << "Clusters: " << endl;
-    for (Cluster c : clusters) {
-        cout << "Cluster is: " << endl;
-        for (shared_ptr<Point> p : c.points) {
-            cout << *p << endl;
-        }
-    }
-
-    cout << "Clusters size: " << clusters.size() << endl;
-
     // Second phase: work of clustering.
     while (clusters.size() > 1) {
         cout << "\n WHILE CLUSTERING LOOP \n" << endl;
@@ -265,41 +240,17 @@ vector<Cluster> cluster_fun(double max_size, vector<shared_ptr<Point>> points) {
         pair<Cluster, vector<Cluster>::iterator> cluster2_pair = closest_clusters.second;
         Cluster cluster2 = cluster2_pair.first;
         vector<Cluster>::iterator cluster2_iter = cluster2_pair.second;
-        cout << "Closest clusters: " << endl;
-        cout << "Cluster 1: " << endl;
-        cout << *cluster1.primary_medoid << endl;
-        cout << "Cluster 2: " << endl;
-        cout << *cluster2.primary_medoid << endl;
-    
+
         if (cluster1.size() + cluster2.size() <= max_size) {
             Cluster merged_cluster = cluster1.merge(cluster2);
-            cout << "Merged cluster: " << endl;
-            for (shared_ptr<Point> p : merged_cluster.points) {
-                cout << *p << endl;
-            }
-            cout << "Primary medoid of clusters before erased: " << endl;
-            // aquí ya está repetido el primary medoid
-            for (Cluster c : clusters) {
-                cout << *c.primary_medoid << endl;
-            }
+            
             // Remove c1 and c2 from C
-            cout << "SE BORRA (1): " << *(*cluster1_iter).primary_medoid << endl;
             clusters.erase(cluster1_iter); 
-            // iter 2 se vuelve basura
             auto cluster2_iter = find(clusters.begin(), clusters.end(), cluster2);
-            cout << "SE BORRA (2): " << *(*cluster2_iter).primary_medoid << endl;
             clusters.erase(cluster2_iter);
-            cout << "(1) -- Primary medoid of clusters after erased: " << endl;
-            for (Cluster c : clusters) {
-                cout << *c.primary_medoid << endl;
-            }
+
             // Add c1 ∪ c2 to C
             clusters.push_back(merged_cluster);
-            cout << "(2) -- Primary medoid of clusters after erased AND push of merged:" << endl;
-            for (Cluster c : clusters) {
-                cout << *c.primary_medoid << endl;
-            }
-
         } else {
             cout << "\n Merge is GREATER than max size" << endl;
             // Add c1 to Cout: el c1, que era el mayor de ambos, está listo para ser añadido
