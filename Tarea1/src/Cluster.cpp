@@ -328,7 +328,7 @@ vector<Cluster> cluster_fun(double max_size, vector<shared_ptr<Point>> points) {
         }
     }
 
-    // HASTA AQUÍ TODO BIEN Y VERIFICADOOOOOO
+    // HASTA AQUÍ TODO BIEN Y VERIFICADOOOOOO --------------------------------------------------------------------------
     cout << "\n CLUSTERING DONE \n" << endl;
     cout << "Clusters output: " << endl;
     for (Cluster c : clusters_output) {

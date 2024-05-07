@@ -6,18 +6,21 @@ MTreeBySS::MTreeBySS(double max_size) : max_size(max_size), min_size(max_size / 
     this->node = nullptr;
 }
 
-Entry MTreeBySS::outputLeafPage(Cluster c_in) {
-    Point g = *c_in.set_primary_medoid();
-    double r = 0;
-    Node C(max_size);
+// Returns an Entry where the point corresponds to the primary medoid of the given cluster and
+// the radious is the maximum distance from the primary medoid to any point in the node to
+// which it a points to.
+Entry MTreeBySS::outputLeafPage(Cluster cluster_input) {
+    Point medoide = *cluster_input.set_primary_medoid();
+    double radius = 0;
+    Node node_C(max_size);
 
-    for (shared_ptr<Point> p : c_in.points) {
-        C.insert(Entry(*p, 0, nullptr));
-        r = max(r, dist(g, *p));
+    for (shared_ptr<Point> point_ptr : cluster_input.points) {
+        node_C.insert(Entry(*point_ptr, 0, nullptr));
+        radius = max(radius, dist(medoide, *point_ptr));
     }
 
-    shared_ptr<Node> a = make_shared<Node>(C);
-    return Entry(g, r, a);
+    shared_ptr<Node> a = make_shared<Node>(node_C);
+    return Entry(medoide, radius, a);
 }
 
 Entry MTreeBySS::outputInternalPage(vector<Entry> c_mra) {
