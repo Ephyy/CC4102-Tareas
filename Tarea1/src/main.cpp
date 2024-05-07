@@ -28,6 +28,7 @@ int main() {
     for (Point p : points) {
         shared_points.push_back(make_shared<Point>(p));
     }
+    points.clear();
 
     MTreeBySS mtree = MTreeBySS(4);
 
@@ -36,20 +37,23 @@ int main() {
     cout << "DONE" << endl;
 
     cout << "Final M tree" << endl;
-    cout << "Entries First Node: " << endl;
-    int i = 0;
+    cout << "Entries Root Node: " << endl;
     for (Entry e : mtree.node->get_entries()) {
-        int j = 0;
-        cout << "NODO i:" << i << endl;
         cout << e.get_p() << endl;
-        cout << "node i, j: " << i << j << endl;
-        for (Entry e2 : e.get_a()->get_entries()) {
-            cout << "node j:" << j << endl;
-            cout << e2.get_p() << endl;
-            j++;
-        }
-        i++;
     }
+    cout << "Entries first son Node: " << endl;
+    for (Entry e : mtree.node->get_entries()[0].get_a()->get_entries()) {
+        cout << e.get_p() << endl;
+    }
+    cout << "Entries second son Node: " << endl;
+    for (Entry e : mtree.node->get_entries()[1].get_a()->get_entries()) {
+        cout << e.get_p() << endl;
+    }
+    cout << "Entries third son Node: " << endl;
+    for (Entry e : mtree.node->get_entries()[2].get_a()->get_entries()) {
+        cout << e.get_p() << endl;
+    }
+
     return 0;
 }
 
