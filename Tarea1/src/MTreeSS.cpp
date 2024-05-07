@@ -23,24 +23,27 @@ Entry MTreeBySS::outputLeafPage(Cluster cluster_input) {
     return Entry(medoide, radius, a);
 }
 
-Entry MTreeBySS::outputInternalPage(vector<Entry> c_mra) {
+// entries_cmra son entradas que outputLeafPage ha devuelto en algún momento
+// (es decir son entradas que apuntan a un nodo hoja)
+// retorna una entrada que apunta a un nodo que contiene todas las entradas
+// pedidas
+Entry MTreeBySS::outputInternalPage(vector<Entry> entries_cmra) {
     // We need to calculate the primary medoid of the set of points Cin
-    Cluster C_in(max_size);
-    for (Entry e : c_mra) {
-        C_in.points.push_back(make_shared<Point>(e.get_p()));
+    // we create a cluster with the points in entries_cmra
+    Cluster cluster_input(max_size);
+    for (Entry e : entries_cmra) {
+        cluster_input.insert(make_shared<Point>(e.get_p()));
     }
-    Point G = *C_in.set_primary_medoid();
-
-    double R = 0;
-    Node C(max_size);
-
-    for (Entry e : c_mra) {
-        C.insert(e);
-        R = max(R, dist(G, e.get_p()) + e.get_cr());
+    Point medoid = *cluster_input.set_primary_medoid();
+    double radius = 0;
+    Node interal_node_C(max_size);
+    for (Entry e : entries_cmra) {
+        interal_node_C.insert(e);
+        radius = max(radius, dist(medoid, e.get_p()) + e.get_cr());
     }
     
-    shared_ptr<Node> A = make_shared<Node>(C);
-    return Entry(G, R, A);
+    shared_ptr<Node> A = make_shared<Node>(interal_node_C);
+    return Entry(medoid, radius, A);
 }
 
 shared_ptr<Node> MTreeBySS::bulkLoad(double max_size, vector<shared_ptr<Point>> points) {
