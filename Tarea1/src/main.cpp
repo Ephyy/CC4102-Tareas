@@ -17,20 +17,13 @@ int main() {
     std::cout << e1.get_a()->get_B() << std::endl;
 
     // MTREE BY SS TESTING
-    vector<Point> points = generateRandomPoints(10, 10);
-    cout << "Points: " << endl;
-
-    for (Point p : points) {
-        cout << p << endl;
-    } 
-    
+    vector<Point> points = generateRandomPoints(100, 1);
     vector<shared_ptr<Point>> shared_points;
     for (Point p : points) {
         shared_points.push_back(make_shared<Point>(p));
     }
     points.clear();
-
-    MTreeBySS mtree = MTreeBySS(4);
+    MTreeBySS mtree = MTreeBySS(10);
 
     cout << "Setting node..." << endl;
     mtree.set_node(shared_points);
@@ -49,10 +42,10 @@ int main() {
     for (Entry e : mtree.node->get_entries()[1].get_a()->get_entries()) {
         cout << e.get_p() << endl;
     }
-    cout << "Entries third son Node: " << endl;
-    for (Entry e : mtree.node->get_entries()[2].get_a()->get_entries()) {
-        cout << e.get_p() << endl;
-    }
+    // cout << "Entries third son Node: " << endl;
+    // for (Entry e : mtree.node->get_entries()[2].get_a()->get_entries()) {
+    //     cout << e.get_p() << endl;
+    // }
 
     return 0;
 }
