@@ -1,12 +1,36 @@
 
 #include <iostream>
+#include <numeric>
 #include <map>
+#include <algorithm>
 #include <vector>
 #include <random>
 #include <cmath>
+#include <chrono> 
+
 #include "Point.h"
+#include "Entry.h"
+#include "Node.h"
 
 using namespace std;
+
+std::ostream& operator<<(std::ostream& os, const std::vector<int>& v) {
+    os << "[";
+    for (const auto& p : v) {
+        os << p << " ";
+    }
+    os << "]";
+    return os;
+}
+
+std::ostream& operator<<(std::ostream& os, const std::vector<vector<int>>& vv) {
+    os << "[";
+    for (const auto& v : vv) {
+        os << v << " ";
+    }
+    os << "]";
+    return os;
+}
 
 std::ostream& operator<<(std::ostream& os, const std::vector<Point>& v) {
     os << "[";
@@ -26,17 +50,26 @@ std::ostream& operator<<(std::ostream& os, const std::vector<std::vector<Point>>
     return os;
 }
 
-// Entrega el indice del punto más cercano a p en el vector de puntos points
-int nearestPoint(Point p, vector<Point>& points) {
-    double minDist = dist(p, points[0]);
-    int nearest = 0;
-    for (int i = 1; i < points.size(); i++) {
-        double d = dist(p, points[i]);
+std::ostream& operator<<(std::ostream& os, const std::map<int, vector<int>>& m) {
+    os << "{";
+    for (const auto& [key, value] : m) {
+        os << key << "=> " << value << " ";
+    }
+    os << "}";
+    return os;
+}
+
+// Entrega el valor samples[f_i] más cercano al punto p_i en el vector de puntos points
+int nearestPoint(int p_i, vector<int>& samples, vector<Point>& points) {
+    double minDist = dist(points[p_i], points[samples[0]]);
+    int nearest = samples[0];
+    for (int f_i = 1; f_i < samples.size(); f_i++) {
+        double d = dist(points[p_i], points[samples[f_i]]);
         if (d < minDist) {
             minDist = d;
-            nearest = i;
+            nearest = samples[f_i];
         }
-    }
+    } 
     return nearest;
 }
 
@@ -44,116 +77,227 @@ int nearestPoint(Point p, vector<Point>& points) {
 // Se seleccionan K puntos aleatorios de la lista de puntos.
 //
 // Returns:
-// Entrega el conjunto de samples F
+// Entrega el conjunto de samples F (los indices de los puntos seleccionados)
 //
-// Ej: selectRandomPoints([(1, 2) (2, 3) (3, 4) (5, 6) ... ], B=2) -> [(1, 2), (5, 6)] 
-vector<Point> selectRandomPoints(vector<Point>& points, int B) {
-    vector<Point> selectedPoints;
-    int n = points.size();
-    int k = std::min(B, n / B);
+// Ej: selectRandomPoints([(1, 2) (2, 3) (3, 4) (5, 6) ... ], B=2) -> [0, 3] 
+vector<int> selectRandomPoints(vector<int>& index_points, int B) {
+    // Calcular el número de puntos a seleccionar
+    int n = index_points.size();
+    double t = static_cast<double>(n) / B;
+    int k = std::min(B, static_cast<int>(std::ceil(t)));
 
-    std::random_device rd;
-    std::mt19937 gen(rd());
-    std::uniform_int_distribution<int> dist(0, n - 1);
+        
+    // Hacer una copia del vector de índices
+    std::vector<int> indicesCopia = index_points;
 
-    for (int i = 0; i < k; i++) {
-        int randomIndex = dist(gen);
-        selectedPoints.push_back(points[randomIndex]);
-        points.erase(points.begin() + randomIndex);
-        n--;
-    }
+    // Barajar el vector
+    std::random_device rd;  // Fuente de entropía
+    std::mt19937 gen(rd());  // Generador Mersenne Twister
+    std::shuffle(indicesCopia.begin(), indicesCopia.end(), gen);
 
-    return selectedPoints;
-}
+    // Seleccionar los primeros k elementos
+    vector<int> samples(indicesCopia.begin(), indicesCopia.begin() + k);
 
-// ## Paso 3) del metodo CP
-// Se asigna cada punto a su sample más cercano
-// 
-// Returns:
-// Entrega un vector con los conjuntos F_k: Los puntos más cercanos a cada sample
-vector<vector<Point>> nearestSample(vector<Point>& points, vector<Point>& samples) {
-    vector<vector<Point>> nearestSamples(samples.size()); // Crea un vector de vectores de puntos, uno para cada muestra
-    
-    for (int i = 0; i < points.size(); i++) {
-        Point p = points[i];
-        int nearestSamp = nearestPoint(p, samples); // Encuentra el índice del sample más cercano a p
-        nearestSamples[nearestSamp].push_back(p); // Agrega p al conjunto de puntos del sample más cercano
-    }
-    return nearestSamples;
+    return samples;
 }
 
 // ## Paso 4) del metodo CP.
 //
 // Etapa de redistribución
-void cpRedistribution(vector<Point>& samples, vector<vector<Point>>& F, double b) {
-    vector<int> toRemove;
-    // Por cada conjunto (F_j) en F
-    for (int j = 0; j < F.size(); j++) {
-        if (F[j].size() < b) {
-            // Quitamos el sample p_j de la lista de samples
-            Point p_j = samples[j];
-            samples.erase(samples.begin() + j);
-            toRemove.push_back(j); // Guardamos el índice del conjunto que se eliminará
+void cpRedistribution(vector<Point> points, vector<int>& samples, vector<vector<int>>& F_j, double b) {
+    // cout << "Antes Distribucion (F_j): " << F_j << endl;
 
-            // Por cada punto en F[j], lo asignamos al sample más cercano de F y lo agremos a su conjunto de puntos
-            for (int i = 0; i < F[j].size(); i++) {
-                Point p = F[j][i];
-                int nearestSamp = nearestPoint(p, samples);
-                F[nearestSamp].push_back(p);
+    // Por cada conjunto (F_j)
+    for (int j = 0; j < F_j.size(); j++) {
+        if (F_j[j].size() < b) {
+            // Quitamos el sample p_j de la lista de samples
+            samples.erase(samples.begin() + j);
+
+            // Por cada punto en F[j], lo asignamos al sample más cercano de F y lo agregamos a su conjunto de puntos
+            for (int i = 0; i < F_j[j].size(); i++) {
+                int p_i = F_j[j][i];
+                int nearestSamp = nearestPoint(p_i, samples, points);
+                F_j[nearestSamp].push_back(p_i);
+                F_j[j].erase(F_j[j].begin() + i);
             }
         }
     }
 
-    // Si no hay conjuntos que eliminar, retornamos
-    if (toRemove.size() == 0) {
-        return;
-    }
+
+    // Usar std::remove_if para "eliminar" vectores vacíos
+    auto it = std::remove_if(F_j.begin(), F_j.end(), [](const vector<int>& v) {
+        return v.empty();  // Condición para eliminar vectores vacíos
+    });
+
+    F_j.erase(it, F_j.end());
+    // cout << "Post Distribucion (F): " << samples << endl;
+    // cout << "Post Distribucion (F_j): " << F_j << endl;
+    return;
 
     // Eliminamos los conjuntos asociado a p_j que fueron eliminados
-    for (int i = toRemove.size() - 1; i >= 0; i--) {
-        F.erase(F.begin() + toRemove[i]);
-    }
+    // for (int i = toRemove.size() - 1; i >= 0; i--) {
+    //     F.erase(F.begin() + toRemove[i]);
+    // }
 }
 
-// // ## Paso 5) del metodo CP.
-// //
-// // Volver al paso 2 si el tamaño del conjunto F es igual a 1
-// //
-// // Returns:
-// // 
-// vector<vector<Point>> checkFSize(vector<vector<Point>>& F, double B) {
-//     if (F.size() == 1) {
-//         vector<Point> new_samples = selectRandomPoints(points, B);
-//         vector<vector<Point>> new_F = nearestSample(points, new_samples);
-//         cpRedistribution(new_samples, new_F, b);
-//         return checkFSize(...);
+// ## Paso 3 y 4) del metodo CP
+// Se asigna cada punto a su sample más cercano y en caso de que un sample tenga menos de b puntos, se redistribuyen los puntos
+// 
+// Returns:
+// Entrega un vector con los conjuntos F_k: Los puntos más cercanos a cada sample
+map<int, vector<int>> nearestSample(vector<Point>& points, vector<int>& index_points, vector<int>& samples, double b) {
+    vector<int> samplesCopia = samples;
+    map<int, vector<int>> F;
+    for (const int& sample : samples) {
+        F[sample] = vector<int>();
+    }
+
+    for (const int& p_i : index_points) {
+        // TODO: opt?
+
+        // Si el punto no es un sample, lo asignamos al sample más cercano
+        if (std::find(samples.begin(), samples.end(), p_i) == samples.end()) {
+            int nearestSamp = nearestPoint(p_i, samples, points); // Encuentra el sample más cercano
+            F[nearestSamp].push_back(p_i); // Agrega p al conjunto de puntos del sample más cercano
+        }
+    }
+
+    cout << "Sample pre paso 4: " << samples << endl;
+    cout << "F pre paso 4: " << F << endl;
+
+    // Paso 4:
+    // Se redistribuyen los puntos si un sample tiene menos de b puntos
+
+    // Por cada conjunto (F_j)
+    for (int j = 0; j < samples.size(); j++) {
+        int f = samples[j];
+        if (F[f].size() < b) {
+            cout << "==== DISTRIBUCION ====" << endl;
+            // Agregamos el sample a F[j]
+            F[f].push_back(f);
+
+            // Obtenemos los puntos a redistribuir
+            vector<int> toDistribute = F[f];
+
+            // Lo boramos de la lista de samples
+            samplesCopia.erase(samplesCopia.begin() + j);
+            
+            F.erase(f); // Borramos el sample del map
+
+            cout << "Redistribuimos: " << f << " -> " << toDistribute << endl;
+            // Distribuimos los puntos en el resto de los samples
+            for (const int& p_i : toDistribute) {
+                int nearestSamp = nearestPoint(p_i, samplesCopia, points);
+                // Agregamos el punto al conjunto de puntos del sample más cercano
+                F[nearestSamp].push_back(p_i);
+
+            }
+        }
+
+    }
+
+    samples = samplesCopia;
+    cout << "Sample post paso 4: " << samples << endl;
+    cout << "F post paso 4: " << F << endl;
+
+    return F;
+}
+
+
+// ## Paso 1 al 5) del metodo CP.
+//
+// Algoritmo recursivo que construye el arbol CP
+//
+// Returns:
+//  El arbol T de un conjunto de puntos
+Node BulkLoading(vector<int> index_point, vector<Point> points, double B) {
+
+    cout << "Puntos: " << index_point << endl;
+
+
+    // Paso 1)
+    if (index_point.size() <= B) {
+        cout << "RETURN NODE" << endl;
+        Node node = Node(B);
+        for (const int& p_i : index_point) {
+            Entry entry = Entry(points[p_i], 0, nullptr);
+            node.insert(entry);
+        }
+        return node;
+    } 
+
+    // Construyo el arbol T
+    Node tree = Node(B);
+
+    // Paso 2 al 5)
+    vector<int> samples = selectRandomPoints(index_point, B); // Paso 2
+    map<int, vector<int>> nearestSamples = nearestSample(points, index_point, samples, tree.get_b()); // Paso 3 y 4
+
+
+    // Si solo hay un punto en el conjunto volver a paso 2
+    int count = 0;
+    while (nearestSamples.size() == 1) {
+        samples = selectRandomPoints(index_point, B); // Paso 2
+        nearestSamples = nearestSample(points, index_point, samples, tree.get_b()); // Paso 3 y 4
+        count++;
+        if (count > 2) {
+            cout << "===== LOOP =====" << endl;
+            break;
+        }
+    }
+
+    for (int i = 0; i < samples.size(); i++) {
+        int f = samples[i];
+        cout << "Punto: " << f << " " <<  nearestSamples[f] << endl;
+        Point p = points[f];
+        auto a = std::make_shared<Node>(BulkLoading(nearestSamples[f], points, B));
+        Entry entry = Entry(p, 0, a);
+        tree.insert(entry);
+    }
+
+
+    return tree;
+}
+
+
+// ## Paso 6) del metodo CP
+// 
+// Se realiza recursivamente el algoritmo CP en cada Fj, obteniendo el arbol Tj
+// vector<vector<int>> recursiveCpTree(vector<vector<int>> F_j) {
+//     vector<vector<int>> T_j; // Vector de vectores de indices de puntos
+
+//     for (const auto& F : F_j) {
+//         int t_j = BulkLoading(F, B); // Aplicar la funcion BulkLoading a cada vector de F_j
+//         T_j.push_back(t_j);
 //     }
-//     return F;
 
+//     return T_j;
 // }
 
-// // ## Paso 6) del metodo CP
-// // 
-// // Se realiza recursivamente el algoritmo CP en cada Fj, obteniendo el arbol Tj
-// void makeTjTrees(vector<Point> user_P) {
-    
-// }
 
-// // Main
+
+// Main
 // int main() {
-//     vector<Point> points = generateRandomPoints(15, 100);
-//     vector<Point> samples = selectRandomPoints(points, 3);
+//     // Capturar el tiempo de inicio
+//     auto inicio = std::chrono::high_resolution_clock::now();
 
+//     int n = 10;
+//     double B = 4;
+//     vector<Point> points = generateRandomPoints(n, 1);
+//     vector<int> indices(n);
+//     std::iota(indices.begin(), indices.end(), 0);
+//     cout << "Points: " << points << endl;
+//     // vector<int> samples = selectRandomPoints(points, 4); // Paso 2
+//     // cout << "Samples (F): " << samples << endl;
+//     // vector<vector<int>> nearestSamples = nearestSample(points, samples, 2); // Paso 3 y 4
 
+//     cout << BulkLoading(indices, points, B) << endl;
 
-//     vector<vector<Point>> nearestSamples = nearestSample(points, samples);
-//     std::cout << nearestSamples << std::endl;
-
-//     cpRedistribution(samples, nearestSamples, 3);
-
-//     std::cout << "Post Distribucion:" << std::endl;
-//     std::cout << samples << std::endl;
-//     std::cout << nearestSamples << std::endl;
+//     // Capturar el tiempo de finalización
+//     auto fin = std::chrono::high_resolution_clock::now();
+//     // Calcular la diferencia de tiempo
+//     std::chrono::duration<double> duracion = fin - inicio;
+//     std::cout << "Tiempo de ejecución: " << duracion.count() << " segundos" << std::endl;
     
 //     return 0;
 // }
