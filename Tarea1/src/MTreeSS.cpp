@@ -47,8 +47,6 @@ Entry MTreeBySS::outputInternalPage(vector<Entry> entries_cmra) {
 }
 
 shared_ptr<Node> MTreeBySS::bulkLoad(double max_size, vector<shared_ptr<Point>> points) {
-    cout << "Bulk loading..." << endl;
-
     // Todos los puntos caben en un mismo nodo
     if (points.size() <= max_size) {
         Cluster cluster_input(max_size);
@@ -61,13 +59,6 @@ shared_ptr<Node> MTreeBySS::bulkLoad(double max_size, vector<shared_ptr<Point>> 
 
     // Clusterizo los puntos
     vector<Cluster> clusters_output = cluster_fun(max_size, points);
-    cout << "Clusters output  DONE, size: " << clusters_output.size() << endl;
-    for (Cluster c : clusters_output) {
-        cout << "Cluster is: " << endl;
-        for (shared_ptr<Point> p : c.points) {
-            cout << *p << endl;
-        }
-    }
 
     // Let C = {}, entries allocated
     vector<Entry> entries;

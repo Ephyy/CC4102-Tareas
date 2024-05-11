@@ -37,7 +37,6 @@ double Cluster::distance(Cluster cluster) {
     return dist(*this->primary_medoid, *(cluster.primary_medoid));
 }
 
-// Test proper insertion of points *******************
 void Cluster::insert(shared_ptr<Point> point) {
     shared_ptr<Point> point_ptr = shared_ptr<Point>(point);
     this->points.push_back(point_ptr);
@@ -212,8 +211,6 @@ pair<pair<Cluster, vector<Cluster>::iterator>, pair<Cluster, vector<Cluster>::it
 }
 
 vector<Cluster> cluster_fun(double max_size, vector<shared_ptr<Point>> points) {
-    cout << "Clustering..." << endl;
-
     // First phase: converts the input set of points into a set of singleton clusters.
     // Let Cout = {} ;
     vector<Cluster> clusters_output;
@@ -257,19 +254,6 @@ vector<Cluster> cluster_fun(double max_size, vector<shared_ptr<Point>> points) {
         }
     }
 
-    // HASTA AQUÍ TODO BIEN Y VERIFICADOOOOOO --------------------------------------------------------------------------
-    cout << "\n CLUSTERING DONE \n" << endl;
-    cout << "Clusters output: " << endl;
-    for (Cluster c : clusters_output) {
-        cout << "Cluster is: " << endl;
-        for (shared_ptr<Point> p : c.points) {
-            cout << *p << endl;
-        }
-    }
-
-    cout << "Clusters output size: " << clusters_output.size() << endl;
-    cout << "Clusters size: " << clusters.size() << endl;
-
     // Third phase: if the last remeining element of C (clusters) contains fewer than CMAX/2 points, 
     // its points and those of its nearest neighbour are reditributed to ensure that no cluster 
     // breaks the minimum size bound.
@@ -284,10 +268,6 @@ vector<Cluster> cluster_fun(double max_size, vector<shared_ptr<Point>> points) {
         // Remove c' from Cout
         clusters_output.erase(neareast_cluster_iter); // maybe neareast_cluster dissapears???
     } 
-    // else {
-    //     // Let c' = {};
-    //     neareast_cluster = Cluster(max_size);
-    // }
 
     Cluster merged_cluster = last_cluster.merge(neareast_cluster);
     if (merged_cluster.size() <= max_size) {
@@ -297,15 +277,8 @@ vector<Cluster> cluster_fun(double max_size, vector<shared_ptr<Point>> points) {
         // Split c ∪ c' into c1 and c2 using the insertion splitting policy
         // tal vez mejor hacer que reciba las referencias de los clusters ya creados y los modifique*****
         pair<Cluster, Cluster> split_clusters = merged_cluster.split(); 
+
         // Add c1 and c2 to Cout
-        cout << "Cluster split 1: " << endl;
-        for (shared_ptr<Point> p : split_clusters.first.points) {
-            cout << *p << endl;
-        }
-        cout << "Cluster split 2: " << endl;
-        for (shared_ptr<Point> p : split_clusters.second.points) {
-            cout << *p << endl;
-        }
         clusters_output.push_back(split_clusters.first);
         clusters_output.push_back(split_clusters.second);
     }
