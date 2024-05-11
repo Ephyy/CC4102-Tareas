@@ -20,6 +20,10 @@ double Point::get_y() {
     return y;
 }
 
+bool Point::operator==(const Point &p) const {
+    return x == p.x && y == p.y;
+}
+
 // Calcula la distancia entre dos puntos
 // Ej: dist(Point(1, 2), Point(5, 3))
 double dist(Point p, Point q)

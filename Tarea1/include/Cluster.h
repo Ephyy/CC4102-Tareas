@@ -3,17 +3,27 @@
 #include <utility>
 #include <memory>
 #include "Point.h"
+#include "Node.h"
+#include "Entry.h"
 
 using namespace std;
 
+// A cluster is a collection of points that may be accomodated within a single disk page
 class Cluster {
     public:
         // Ver si es mejor usar otra estructura de datos
         vector<shared_ptr<Point>> points;
+
+        // A cluster’s location is considered to be that of its medoid.
         shared_ptr<Point> primary_medoid;
+
+        // The cluster radius is the distance between the medoid and its furthest neighbour 
+        // in the cluster. The cluster boundary falls at this distance from the medoid.
         double radius;
+
         // B 
         double max_size; 
+
         // b
         double min_size;
 
@@ -37,12 +47,15 @@ class Cluster {
         // Given a cluster c, a nearest neighbour of c in a set of clusters C is a cluster c'
         // such that there is no other cluster in C whose distance to c is less than
         // that between c and c'. (c may have multiple nearest neighbours in C.)
-        pair<Cluster &, vector<Cluster>::iterator> nearest_neighbour(vector<Cluster> clusters);
+        pair<Cluster, vector<Cluster>::iterator> nearest_neighbour(vector<Cluster> &clusters);
 
         // Returns a NEW cluster that is the result of merging this cluster with another.
-        Cluster merge(Cluster &cluster);
+        Cluster merge(Cluster cluster);
 
-        pair<Cluster &, Cluster &> split();
+        // MinMax split policy
+        pair<Cluster, Cluster> split();
+
+        bool operator==(const Cluster &cluster) const;
 };
 
 // Returns a pair of a pair with the cluster and its iterator from the closest pair of clusters.
@@ -51,11 +64,11 @@ class Cluster {
 // d(c1, c2) <= d(ci, cj) for all ci, cj ∈ C
 // 
 // For the returned pair, |c1| > |c2|
-pair<pair<Cluster &, vector<Cluster>::iterator>, pair<Cluster &, vector<Cluster>::iterator>> closest_pair(vector<Cluster> clusters);
+pair<pair<Cluster, vector<Cluster>::iterator>, pair<Cluster, vector<Cluster>::iterator>> closest_pair(vector<Cluster> &clusters);
 
 // Returns a set of clusters, each of cardinality in [CMAX/2, CMAX].
 // 
 // Arguments:
 //      CMAX: maximum acceptable cardinality of a cluster,
 //      Cin: a set of at least CMAX/2 points
-vector<Cluster> cluster(double CMAX, vector<Point> &c_in);
+vector<Cluster> cluster_fun(double max_size, vector<shared_ptr<Point>> points);
