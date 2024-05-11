@@ -51,13 +51,44 @@ std::ostream& operator<<(std::ostream& os, const std::vector<std::vector<Point>>
 }
 
 std::ostream& operator<<(std::ostream& os, const std::map<int, vector<int>>& m) {
-    os << "{";
+    os << "{\n";
     for (const auto& [key, value] : m) {
+        os << "    " << key << "=> " << value << "\n";
+    }
+    os << "}";
+    return os;
+}
+
+std::ostream& operator<<(std::ostream& os, const std::map<int, Node>& n) {
+    os << "{";
+    for (const auto& [key, value] : n) {
         os << key << "=> " << value << " ";
     }
     os << "}";
     return os;
 }
+
+std::ostream& operator<<(std::ostream& os, const std::map<int, std::shared_ptr<Node>>& n) {
+    os << "{\n";
+    for (const auto& [key, value] : n) {
+        os << "    " << key << " => " << *value << "\n";
+    }
+    os << "}";
+    return os;
+}
+
+
+
+
+// Función que dado un punto, devuelve su índice en un vector de puntos
+int findPointIndex(const Point& point, const vector<Point>& points) {
+    auto it = find(points.begin(), points.end(), point);
+    if (it != points.end()) {
+        return distance(points.begin(), it);
+    }
+    return -1; // Si el punto no se encuentra en el vector
+}
+
 
 // Entrega el valor samples[f_i] más cercano al punto p_i en el vector de puntos points
 int nearestPoint(int p_i, vector<int>& samples, vector<Point>& points) {
@@ -101,44 +132,6 @@ vector<int> selectRandomPoints(vector<int>& index_points, int B) {
     return samples;
 }
 
-// ## Paso 4) del metodo CP.
-//
-// Etapa de redistribución
-void cpRedistribution(vector<Point> points, vector<int>& samples, vector<vector<int>>& F_j, double b) {
-    // cout << "Antes Distribucion (F_j): " << F_j << endl;
-
-    // Por cada conjunto (F_j)
-    for (int j = 0; j < F_j.size(); j++) {
-        if (F_j[j].size() < b) {
-            // Quitamos el sample p_j de la lista de samples
-            samples.erase(samples.begin() + j);
-
-            // Por cada punto en F[j], lo asignamos al sample más cercano de F y lo agregamos a su conjunto de puntos
-            for (int i = 0; i < F_j[j].size(); i++) {
-                int p_i = F_j[j][i];
-                int nearestSamp = nearestPoint(p_i, samples, points);
-                F_j[nearestSamp].push_back(p_i);
-                F_j[j].erase(F_j[j].begin() + i);
-            }
-        }
-    }
-
-
-    // Usar std::remove_if para "eliminar" vectores vacíos
-    auto it = std::remove_if(F_j.begin(), F_j.end(), [](const vector<int>& v) {
-        return v.empty();  // Condición para eliminar vectores vacíos
-    });
-
-    F_j.erase(it, F_j.end());
-    // cout << "Post Distribucion (F): " << samples << endl;
-    // cout << "Post Distribucion (F_j): " << F_j << endl;
-    return;
-
-    // Eliminamos los conjuntos asociado a p_j que fueron eliminados
-    // for (int i = toRemove.size() - 1; i >= 0; i--) {
-    //     F.erase(F.begin() + toRemove[i]);
-    // }
-}
 
 // ## Paso 3 y 4) del metodo CP
 // Se asigna cada punto a su sample más cercano y en caso de que un sample tenga menos de b puntos, se redistribuyen los puntos
@@ -162,8 +155,6 @@ map<int, vector<int>> nearestSample(vector<Point>& points, vector<int>& index_po
         }
     }
 
-    cout << "Sample pre paso 4: " << samples << endl;
-    cout << "F pre paso 4: " << F << endl;
 
     // Paso 4:
     // Se redistribuyen los puntos si un sample tiene menos de b puntos
@@ -197,8 +188,6 @@ map<int, vector<int>> nearestSample(vector<Point>& points, vector<int>& index_po
     }
 
     samples = samplesCopia;
-    cout << "Sample post paso 4: " << samples << endl;
-    cout << "F post paso 4: " << F << endl;
 
     return F;
 }
@@ -212,12 +201,9 @@ map<int, vector<int>> nearestSample(vector<Point>& points, vector<int>& index_po
 //  El arbol T de un conjunto de puntos
 Node BulkLoading(vector<int> index_point, vector<Point> points, double B) {
 
-    cout << "Puntos: " << index_point << endl;
-
-
     // Paso 1)
     if (index_point.size() <= B) {
-        cout << "RETURN NODE" << endl;
+        cout << "RETURN NODE: " << index_point << endl;
         Node node = Node(B);
         for (const int& p_i : index_point) {
             Entry entry = Entry(points[p_i], 0, nullptr);
@@ -248,7 +234,6 @@ Node BulkLoading(vector<int> index_point, vector<Point> points, double B) {
 
     for (int i = 0; i < samples.size(); i++) {
         int f = samples[i];
-        cout << "Punto: " << f << " " <<  nearestSamples[f] << endl;
         Point p = points[f];
         auto a = std::make_shared<Node>(BulkLoading(nearestSamples[f], points, B));
         Entry entry = Entry(p, 0, a);
@@ -260,44 +245,163 @@ Node BulkLoading(vector<int> index_point, vector<Point> points, double B) {
 }
 
 
-// ## Paso 6) del metodo CP
-// 
-// Se realiza recursivamente el algoritmo CP en cada Fj, obteniendo el arbol Tj
-// vector<vector<int>> recursiveCpTree(vector<vector<int>> F_j) {
-//     vector<vector<int>> T_j; // Vector de vectores de indices de puntos
+// Funcion auxliar del paso 9 que realiza una busqueda exhaustiva en el arbol
+// para encontrar todos los sub arboles de altura h
+void splitIntoSubTrees(map<int, std::shared_ptr<Node>>& newSubTrees, int s, std::shared_ptr<Node>& tree, int h, vector<Point>& points) {
+    // Caso base:
+    // Si la altura del arbol es igual a h, se agrega a subTrees
+    if (tree->height() == h) {
+        clog << "PASO9: Agregando sub arbol " << s << endl;
+        newSubTrees[s] = tree;
+    } else {
+        // Caso recursivo:
+        // Se recorre el arbol en busca de sub arboles de altura h
+        for (const auto& entry : tree->get_entries()) {
+            // Obtengo el punto
+            Point p = entry.get_p();
+            // Obtengo el indice
+            int new_sample = findPointIndex(p, points);
+            // Obtengo el sub arbol
+            std::shared_ptr<Node> subTree = entry.get_a();
+            // Llamada recursiva
+            splitIntoSubTrees(newSubTrees, new_sample, subTree, h, points);
+        }
+    }
+}
 
-//     for (const auto& F : F_j) {
-//         int t_j = BulkLoading(F, B); // Aplicar la funcion BulkLoading a cada vector de F_j
-//         T_j.push_back(t_j);
-//     }
 
-//     return T_j;
-// }
+// Algoritmo 
+map<int, std::shared_ptr<Node>> cpAlgorithm(vector<Point>& points, double B) {
+    int n = points.size();
+    double b = 0.5 * B;
+
+    // Paso 1
+    vector<int> index_point(n);
+    std::iota(index_point.begin(), index_point.end(), 0);
 
 
+    vector<int> samples = selectRandomPoints(index_point, B); // Paso 2
+    map<int, vector<int>> nearestSamples = nearestSample(points, index_point, samples, b); // Paso 3 y 4
+    map<int, std::shared_ptr<Node>> subTrees; // Sub arboles de los samples
+    for (const auto& [s, F] : nearestSamples) {
+        auto a = std::make_shared<Node>(BulkLoading(F, points, B));
+        subTrees[s] = a;
+    }
 
-// Main
-// int main() {
-//     // Capturar el tiempo de inicio
-//     auto inicio = std::chrono::high_resolution_clock::now();
+    clog << "Sub arboles: " << subTrees << endl;
 
-//     int n = 10;
-//     double B = 4;
-//     vector<Point> points = generateRandomPoints(n, 1);
-//     vector<int> indices(n);
-//     std::iota(indices.begin(), indices.end(), 0);
-//     cout << "Points: " << points << endl;
-//     // vector<int> samples = selectRandomPoints(points, 4); // Paso 2
-//     // cout << "Samples (F): " << samples << endl;
-//     // vector<vector<int>> nearestSamples = nearestSample(points, samples, 2); // Paso 3 y 4
+    // Paso 7
+    // Si la raiz de un sub arbol es de un tamaño menor a b,
+    // se elimina el sample
+    // se trabaja con sus subarboles como nuevos arboles
+    // se añaden los puntos pertinentes de estos sub arboles como samples
 
-//     cout << BulkLoading(indices, points, B) << endl;
+    auto it = subTrees.begin();
+    while (it != subTrees.end()) {
+        int s = it->first;
+        std::shared_ptr<Node> subT = it->second;
+        int childs = subT->get_entries().size();
+        if (childs < subT->get_b()) {
+            cout << "Sub arbol: " << s << " es menor a b" << endl;
+            cout << "Cantidad de hijos: " << childs << endl;
 
-//     // Capturar el tiempo de finalización
-//     auto fin = std::chrono::high_resolution_clock::now();
-//     // Calcular la diferencia de tiempo
-//     std::chrono::duration<double> duracion = fin - inicio;
-//     std::cout << "Tiempo de ejecución: " << duracion.count() << " segundos" << std::endl;
+            // Elimino el sample del vector del map
+            it = subTrees.erase(it);
+
+
+            // Agrego los sub arboles como nuevos arboles
+            for (const auto& entry : subT->get_entries()) {
+                // Obtenemos el punto
+                Point p = entry.get_p();
+                // Obtenemos el indice
+                int new_sample = findPointIndex(p, points);
+                // Obtenemos el sub arbol
+                std::shared_ptr<Node> a = entry.get_a();
+                // Agregamos el sub arbol
+                subTrees[new_sample] = a;
+
+                cout << "Agregando sub arbol: " << new_sample << endl;
+
+            }
+
+        } else {
+            it++;
+        }
+
+    }
+
+    cout << "PASO7: Sub arboles post eliminacion de raices <b " << subTrees << endl;
     
-//     return 0;
-// }
+    // Paso 8 : Calcular la altura mínima de los árboles en subTrees
+    int h = INT_MAX;
+    map<int, std::shared_ptr<Node>> newSubTrees;
+    for (const auto& [s, subT] : subTrees) {
+        int height = subT->height();
+        if (height < h) {
+            h = height;
+        }
+    }
+
+    // Paso 9:
+    // Por cada subTree si su altura es igual a h, se agrega a newSubTrees
+    // En caso contrario:
+    // 1. Se borra el sample
+    // 2. Se hace un busqueda exhaustiva en el arbol para encontrar todos los sub arboles de altura h. Se agregan a newSubTrees
+    // 3. Se agregan los puntos pertinentes de estos sub arboles como samples
+    it = subTrees.begin();
+    while (it != subTrees.end()) {
+        int s = it->first;
+        std::shared_ptr<Node> subT = it->second;
+        if (subT->height() == h) {
+            newSubTrees[s] = subT;
+            it++;
+        } else {
+            // Elimino el sample
+            it = subTrees.erase(it);
+            clog << "PASO9: Eliminando sample: " << s << endl;
+            // Busqueda exhaustiva
+            splitIntoSubTrees(newSubTrees, s, subT, h, points);
+        }
+    }
+
+
+
+    cout << "Sub Arboles Post: " << subTrees << endl;
+    cout << "Nuevos Sub Tree set: " << newSubTrees << endl;
+
+    // Validacion
+    for (const auto& [s, subT] : newSubTrees) {
+        if (subT->height() != h) {
+            clog << "ERROR: Sub arbol " << s << " no tiene altura " << h << endl;
+        }
+    }
+
+    return subTrees;
+}
+
+
+// Main 
+int main() {
+    // Capturar el tiempo de inicio
+    auto inicio = std::chrono::high_resolution_clock::now();
+
+    // Crear un vector de puntos
+    int n = 64;
+    vector<Point> points = generateRandomPoints(n, 1);
+    
+    // Crear un arbol CP
+    double B = 4;
+    map<int, std::shared_ptr<Node>> subTrees = cpAlgorithm(points, B);
+
+
+
+
+    // Capturar el tiempo de finalización
+    auto fin = std::chrono::high_resolution_clock::now();
+    // Calcular la diferencia de tiempo
+    std::chrono::duration<double> duracion = fin - inicio;
+    std::cout << "Tiempo de ejecución: " << duracion.count() << " segundos" << std::endl;
+    
+    return 0;
+}
+
