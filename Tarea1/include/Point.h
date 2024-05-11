@@ -25,5 +25,7 @@ struct Point {
 double dist(Point p, Point q);
 vector<Point> generateRandomPoints(int n, double range);
 std::ostream& operator<<(std::ostream& os, const Point& p);
+// Operator overloading
+bool operator==(const Point& p1, const Point& p2);
 
 #endif
