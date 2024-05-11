@@ -3,10 +3,10 @@
 
 #include <set>
 #include <memory>
-#include "Entry.h" // Include the missing header file for the 'Entry' class
+#include <vector>
 
 
-class Entry; // Forward declaration of the 'Entry' class
+class Entry;
 
 class Node {
 private:
@@ -18,11 +18,22 @@ public:
     // Constructor
     Node(double B);
 
+    // Leaf
+    bool is_leaf() const;
+    // Height
+    int height() const;
+
     // Getters
-    double get_b();
+    std::vector<Entry> get_entries() const;
+    double get_b() const;
     double get_B();
 
     void insert(Entry e);
+
+    
 };
+
+// Print
+std::ostream& operator<<(std::ostream& os, const Node& n);
 
 #endif
