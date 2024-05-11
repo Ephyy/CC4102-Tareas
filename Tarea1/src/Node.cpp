@@ -1,7 +1,12 @@
 #include <iostream>
-#include "Node.h"
-#include "Entry.h"
+#include <algorithm>
+#include <vector>
 
+#include "Point.h"
+#include "Entry.h"
+#include "Node.h"
+
+using namespace std;
 
 
 // Constructor
@@ -47,6 +52,11 @@ int Node::height() const
     }
 }
 
+// Checks if the node contains all the points
+bool Node::validate(vector<Point>& points) const
+{
+    return false;
+}
 
 // Getters
 std::vector<Entry> Node::get_entries() const {

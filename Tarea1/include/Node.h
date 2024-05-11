@@ -22,6 +22,8 @@ public:
     bool is_leaf() const;
     // Height
     int height() const;
+    // Checks if the node contains all the points
+    bool validate(vector<Point>& points) const;
 
     // Getters
     std::vector<Entry> get_entries() const;
