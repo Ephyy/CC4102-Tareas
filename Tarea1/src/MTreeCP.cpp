@@ -152,15 +152,12 @@ map<int, vector<int>> nearestSample(vector<Point>& points, vector<int>& index_po
     vector<int> samplesCopia = samples;
     for (const int& s : samples) {
         if (F[s].size() < b) {
-            cout << "==== DISTRIBUCION ====" << endl;
             // Obtenemos los puntos a redistribuir
             vector<int> toDistribute = F[s];
 
             // Lo boramos de la lista de samples
             samplesCopia.erase(std::remove(samplesCopia.begin(), samplesCopia.end(), s), samplesCopia.end());
             F.erase(s); // Borramos el sample del map
-            
-            cout << "Redistribuimos: " << s << " -> " << toDistribute << endl;
 
             // Distribuimos los puntos en el resto de los samples
             for (const int& p_i : toDistribute) {
@@ -188,12 +185,10 @@ map<int, vector<int>> getFinalSamples(vector<int>& index_point, vector<Point>& p
     // Paso 5: Si solo hay un punto en el conjunto volver a paso 2
     int count = 0;
     while (nearestSamples.size() == 1) {
-        cout << "PASO5: Escoger nuevos samples, anterior: " << samples << endl;
         samples = selectRandomPoints(index_point, B); // Paso 2
         nearestSamples = nearestSample(points, index_point, samples, b); // Paso 3 y 4
         count++;
         if (count > 5) {
-            cout << "===== LOOP =====" << endl;
             break;
         }
     }
@@ -212,7 +207,6 @@ Node BulkLoading(vector<int> index_point, vector<Point> points, double B) {
 
     // Paso 1)
     if (index_point.size() <= B) {
-        cout << "RETURN NODE: " << index_point << endl;
         Node node = Node(B);
         for (const int& p_i : index_point) {
             Entry entry = Entry(points[p_i], 0, nullptr);
@@ -244,7 +238,6 @@ void splitIntoSubTrees(map<int, std::shared_ptr<Node>>& newSubTrees, int s, std:
     // Caso base:
     // Si la altura del arbol es igual a h, se agrega a subTrees
     if (tree->height() == h) {
-        clog << "PASO9: Agregando sub arbol " << s << endl;
         newSubTrees[s] = tree;
     } else {
         // Caso recursivo:
@@ -290,6 +283,7 @@ void addSubTrees(Node& Tsup, map<int, std::shared_ptr<Node>>& subTrees, vector<P
 
 // Algoritmo 
 std::shared_ptr<Node> cpAlgorithm(vector<Point>& points, double B, double b) {
+    cout << "TreeCP: Creando CP Tree" << endl;
     int n = points.size();
 
     // Paso 1
@@ -299,15 +293,12 @@ std::shared_ptr<Node> cpAlgorithm(vector<Point>& points, double B, double b) {
     // Paso 2 al 5
     map<int, vector<int>> nearestSamples = getFinalSamples(index_point, points, B, b);
 
-    
     // Paso 6, se realiza recursivamente el algoritmo para cada conjunto de puntos
     map<int, std::shared_ptr<Node>> subTrees; // Sub arboles de los samples
     for (const auto& [s, F] : nearestSamples) {
         auto a = std::make_shared<Node>(BulkLoading(F, points, B));
         subTrees[s] = a;
     }
-
-    clog << "Sub arboles: " << subTrees << endl;
 
     // Paso 7
     // Si la raiz de un sub arbol es de un tamaño menor a b,
@@ -322,8 +313,6 @@ std::shared_ptr<Node> cpAlgorithm(vector<Point>& points, double B, double b) {
         int childs = subT->get_entries().size();
 
         if (childs < subT->get_b()) {
-            cout << "Sub arbol: " << s << " es menor a b" << endl;
-            cout << "Cantidad de hijos: " << childs << endl;
 
             // Elimino el sample del vector del map
             it = subTrees.erase(it);
@@ -339,9 +328,6 @@ std::shared_ptr<Node> cpAlgorithm(vector<Point>& points, double B, double b) {
                 std::shared_ptr<Node> a = entry.get_a();
                 // Agregamos el sub arbol
                 subTrees[new_sample] = a;
-
-                cout << "Agregando sub arbol: " << new_sample << endl;
-
             }
 
         } else {
@@ -349,8 +335,6 @@ std::shared_ptr<Node> cpAlgorithm(vector<Point>& points, double B, double b) {
         }
 
     }
-
-    cout << "PASO7: Sub arboles post eliminacion de raices menores a b " << subTrees << endl;
     
     // Paso 8 : Calcular la altura mínima de los árboles en subTrees
     int h = INT_MAX;
@@ -378,15 +362,10 @@ std::shared_ptr<Node> cpAlgorithm(vector<Point>& points, double B, double b) {
         } else {
             // Elimino el sample
             it = subTrees.erase(it);
-            clog << "PASO9: Eliminando sample: " << s << endl;
             // Busqueda exhaustiva
             splitIntoSubTrees(newSubTrees, s, subT, h, points);
         }
     }
-
-
-    cout << "Sub Arboles Post: " << subTrees << endl;
-    cout << "Nuevos Sub Tree set: " << newSubTrees << endl;
 
     // Paso 10, se calcula el arbol Tsup a partir de los samples que quedaron
     vector<int> finalSamples;
@@ -395,19 +374,15 @@ std::shared_ptr<Node> cpAlgorithm(vector<Point>& points, double B, double b) {
     }
 
     Node T_sup = BulkLoading(finalSamples, points, B);
-    cout << "PASO10: Tsup" << endl;
-    cout << "> Tsup = " << T_sup << endl;
 
     // Paso 11, agregar en las hojas de Tsup los sub arboles de newSubTrees
     // Recoremos el arboll Tsup
     addSubTrees(T_sup, newSubTrees, points);
-    cout << "PASO11: Tsup post agregacion de los subTree" << endl;
-    cout << "> Tsup = " << T_sup << endl;
 
     // Paso 12, actualizar el radio de cobertura de cada entrada en el arbol
     std::shared_ptr<Node> Tree = std::make_shared<Node>(T_sup);
     set_covering_radius(Tree);
-    cout << "PASO12: Arbol final" << endl;
+    cout << "TreeCP: CP Tree creado" << endl;
     return Tree;
 }
 

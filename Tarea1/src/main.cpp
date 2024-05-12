@@ -42,6 +42,9 @@ void experiment(int method, int n_exp) {
     vector<Point> points = generateRandomPoints(pow(2, n_exp), n_exp);
     // Capturar el tiempo de inicio
     auto inicio_creation = std::chrono::high_resolution_clock::now();
+    // Imprimir la hora y minuto de inicio
+    auto inicio_creation_time = std::chrono::system_clock::to_time_t(inicio_creation);
+    std::cout << "Inicio de creación: " << std::ctime(&inicio_creation_time);
     if (method == CP_METHOD) {
         cout << "M-Tree by CP algorithm" << endl;
         // Crear el arbol
@@ -112,8 +115,9 @@ void experiment(int method, int n_exp) {
 }
 
 int main() {
-    // Correr experimento
-    experiment(SS_METHOD, 10);
+    for (int i = 11; i <= 14; i++) {
+        experiment(CP_METHOD, i);
+    }
     return 0;
 }
 
