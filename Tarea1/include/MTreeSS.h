@@ -8,7 +8,7 @@ using namespace std;
 
 class MTreeBySS {
     public:
-        shared_ptr<Node> node;
+        shared_ptr<Node> root;
         double max_size;
         double min_size;
 

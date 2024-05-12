@@ -3,7 +3,7 @@
 using namespace std;
 
 MTreeBySS::MTreeBySS(double max_size) : max_size(max_size), min_size(max_size / 2) {
-    this->node = nullptr;
+    this->root = nullptr;
 }
 
 // Returns an Entry where the point corresponds to the primary medoid of the given cluster and
@@ -113,5 +113,5 @@ shared_ptr<Node> MTreeBySS::bulkLoad(double max_size, vector<shared_ptr<Point>> 
 }
 
 void MTreeBySS::set_node(vector<shared_ptr<Point>> points) {
-    this->node = bulkLoad(max_size, points);
+    this->root = bulkLoad(max_size, points);
 }  

@@ -1,1 +1,3 @@
 build/*
+experiments/*.tsv
+experiments/creation/*.txt
