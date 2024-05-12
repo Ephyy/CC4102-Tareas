@@ -26,10 +26,10 @@ public:
     bool validate(vector<Point>& points) const;
 
     // Getters
-    std::vector<Entry> get_entries() const;
+    std::vector<Entry> get_entries_copy() const;
     double get_b() const;
     double get_B();
-    std::vector<Entry>& get_entries();
+    std::vector<Entry> &get_entries();
 
     // Setters
     void insert(Entry e);

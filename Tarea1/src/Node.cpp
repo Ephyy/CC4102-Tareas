@@ -59,11 +59,11 @@ bool Node::validate(vector<Point>& points) const
 }
 
 // Getters
-std::vector<Entry> Node::get_entries() const {
+std::vector<Entry> Node::get_entries_copy() const {
     return entries;
 }
 
-std::vector<Entry>& Node::get_entries() {
+std::vector<Entry> &Node::get_entries() {
     return entries;
 }
 
@@ -82,7 +82,7 @@ void Node::insert(Entry e) {
 
 // Print
 std::ostream& operator<<(std::ostream& os, const Node& n) {
-    os << "Node(" << n.get_entries() << ")";
+    os << "Node(" << n.get_entries_copy() << ")";
     return os;
 }
 
