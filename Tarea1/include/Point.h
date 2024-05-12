@@ -28,6 +28,7 @@ struct Point {
 
 double dist(Point p, Point q);
 vector<Point> generateRandomPoints(int n, double range);
+vector<Point> generateRandomPoints(int n, int seed);
 std::ostream& operator<<(std::ostream& os, const Point& p);
 
 // Closest pair of points
