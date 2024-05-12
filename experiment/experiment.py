@@ -5,16 +5,14 @@ import math
 # El eje X son los accesos
 # El eje Y el conteo de esos accesos
 
-data = np.array([1, 2, 3, 3, 4, 5, 5, 5, 6, 6, 6, 6, 7, 7, 8, 8, 8, 9, 10])
+dataCP = np.array([1, 2, 3, 3, 4, 5, 5, 5, 6, 6, 6, 6, 7, 7, 8, 8, 8, 9, 10])
+dataSS = np.array([2, 3, 4, 4, 4, 5, 6, 6, 7, 7, 7, 7, 8, 8, 9, 9, 9, 10])
 
 # Experimentación en una experimentación supongo
 # Para hacer una distribución normal basada en estos valores x
-mediaX = np.mean(data)
-desviacionEstandarX = np.std(data)
+mediaX = np.mean(dataCP)
+desviacionEstandarX = np.std(dataCP)
 datosNormal = np.random.normal(mediaX, desviacionEstandarX, 1000)
-
-# Normal con media 5, desviación estándar y 10000 números generados para esta muestra
-datos_normal = np.random.normal(5, 1, 10000)
 
 # Exponente que indica la cantidad de puntos del set P
 # Es para el label más que nada
@@ -24,8 +22,9 @@ n = 10
 # bins: cantidad de "contenedores" para dividir los datos
 # density: normalizar la altura de cada contenedor (influirá si ambos trabajan con 100 datos?)
 # alpha: transparencia/opacidad de las barras
-plt.hist(data, bins=25, density=True, alpha=0.5, color='r', label='Método CP')
-plt.hist(datosNormal, bins=25, density=True, alpha=0.5, color='b', label='Método SS')
+plt.hist(dataCP, bins=25, density=True, alpha=0.5, color='r', label='Método CP')
+plt.hist(dataSS, bins=25, density=True, alpha=0.5, color='b', label='Método SS')
+plt.hist(datosNormal, bins=25, density=True, alpha=0.5, color='g', label='Distribución normal')
 
 # Labels
 plt.xlabel('Cantidad de accesos')
