@@ -11,11 +11,10 @@ class RangeQuery {
         Point q;
         // Radio de búsqueda
         double r;
-        // vector<shared_ptr<Point>> answer;
 
         RangeQuery(Point q, double r);
 
         // Encuentra todos los puntos del M-Tree que residen
         // dentro de la bola
-        void lookup(shared_ptr<Node> node, vector<Point> &answer);
+        int lookup(shared_ptr<Node> node, vector<Point> &answer);
 };
