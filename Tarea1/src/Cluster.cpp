@@ -10,10 +10,6 @@ Cluster::Cluster(double max_size) :
     points() {
 }
 
-// Think about an optimization for this function 
-// Podria ir guardando los iteradores de los puntos en un set
-// Pensando que cada punto es una única instancia de Point, puedo guardar una tupla con ambos punteros
-// y las distancias en un set ordenado por distancia ayyy no se
 shared_ptr<Point> Cluster::set_primary_medoid() {
     if (this->points.size() == 1) {
         this->primary_medoid = shared_ptr<Point>(this->points[0]);
@@ -37,7 +33,6 @@ double Cluster::distance(Cluster cluster) {
     return dist(*this->primary_medoid, *(cluster.primary_medoid));
 }
 
-// Test proper insertion of points *******************
 void Cluster::insert(shared_ptr<Point> point) {
     shared_ptr<Point> point_ptr = shared_ptr<Point>(point);
     this->points.push_back(point_ptr);
@@ -193,27 +188,28 @@ bool Cluster::operator==(const Cluster &cluster) const {
 pair<pair<Cluster, vector<Cluster>::iterator>, pair<Cluster, vector<Cluster>::iterator>> closest_pair(vector<Cluster> &clusters) {
     pair<Cluster, vector<Cluster>::iterator> cluster1_pair = make_pair(clusters[0], clusters.begin());
     pair<Cluster, vector<Cluster>::iterator> cluster2_pair = make_pair(clusters[1], clusters.begin() + 1);
-    double min_distance = 100; //= cluster1_pair.first.distance(cluster2_pair.first);
-    for (auto cluster1_iter = clusters.begin(); cluster1_iter != clusters.end(); cluster1_iter++) {
-        Cluster current_cluster1 = *cluster1_iter;
-        pair<Cluster, vector<Cluster>::iterator> current_cluster2_pair = current_cluster1.nearest_neighbour(clusters);
-        Cluster current_cluster2 = current_cluster2_pair.first;
-        double distance = current_cluster1.distance(current_cluster2);
-        if (distance < min_distance) {
-            min_distance = distance;
-            cluster1_pair = make_pair(*cluster1_iter, cluster1_iter);
-            cluster2_pair = current_cluster2_pair;
-        }
+    vector<Point> points;
+    for (auto cluster : clusters) { // en tiempo n
+        points.push_back(Point(*cluster.primary_medoid));
     }
-    if (cluster1_pair.first.size() < cluster2_pair.first.size()) {
-        return make_pair(cluster2_pair, cluster1_pair);
-    }
+    pair<double, pair<Point, Point>> closest_points = closest(points, points.size()); // tiempo nlogn
+
+    Point p1 = closest_points.second.first;
+    Point p2 = closest_points.second.second;
+    vector<Cluster>::iterator cluster1_iter = find_if(clusters.begin(), clusters.end(), [&p1] (Cluster c) { // tiempo n
+        return *c.primary_medoid == p1;
+    });
+    vector<Cluster>::iterator cluster2_iter = find_if(clusters.begin(), clusters.end(), [&p2] (Cluster c) {
+        return *c.primary_medoid == p2;
+    });
+
+    cluster1_pair = make_pair(Cluster(*cluster1_iter), cluster1_iter);
+    cluster2_pair = make_pair(Cluster(*cluster2_iter), cluster2_iter);
+
     return make_pair(cluster1_pair, cluster2_pair);
 }
 
 vector<Cluster> cluster_fun(double max_size, vector<shared_ptr<Point>> points) {
-    cout << "Clustering..." << endl;
-
     // First phase: converts the input set of points into a set of singleton clusters.
     // Let Cout = {} ;
     vector<Cluster> clusters_output;
@@ -257,19 +253,6 @@ vector<Cluster> cluster_fun(double max_size, vector<shared_ptr<Point>> points) {
         }
     }
 
-    // HASTA AQUÍ TODO BIEN Y VERIFICADOOOOOO --------------------------------------------------------------------------
-    cout << "\n CLUSTERING DONE \n" << endl;
-    cout << "Clusters output: " << endl;
-    for (Cluster c : clusters_output) {
-        cout << "Cluster is: " << endl;
-        for (shared_ptr<Point> p : c.points) {
-            cout << *p << endl;
-        }
-    }
-
-    cout << "Clusters output size: " << clusters_output.size() << endl;
-    cout << "Clusters size: " << clusters.size() << endl;
-
     // Third phase: if the last remeining element of C (clusters) contains fewer than CMAX/2 points, 
     // its points and those of its nearest neighbour are reditributed to ensure that no cluster 
     // breaks the minimum size bound.
@@ -284,10 +267,6 @@ vector<Cluster> cluster_fun(double max_size, vector<shared_ptr<Point>> points) {
         // Remove c' from Cout
         clusters_output.erase(neareast_cluster_iter); // maybe neareast_cluster dissapears???
     } 
-    // else {
-    //     // Let c' = {};
-    //     neareast_cluster = Cluster(max_size);
-    // }
 
     Cluster merged_cluster = last_cluster.merge(neareast_cluster);
     if (merged_cluster.size() <= max_size) {
@@ -297,15 +276,8 @@ vector<Cluster> cluster_fun(double max_size, vector<shared_ptr<Point>> points) {
         // Split c ∪ c' into c1 and c2 using the insertion splitting policy
         // tal vez mejor hacer que reciba las referencias de los clusters ya creados y los modifique*****
         pair<Cluster, Cluster> split_clusters = merged_cluster.split(); 
+
         // Add c1 and c2 to Cout
-        cout << "Cluster split 1: " << endl;
-        for (shared_ptr<Point> p : split_clusters.first.points) {
-            cout << *p << endl;
-        }
-        cout << "Cluster split 2: " << endl;
-        for (shared_ptr<Point> p : split_clusters.second.points) {
-            cout << *p << endl;
-        }
         clusters_output.push_back(split_clusters.first);
         clusters_output.push_back(split_clusters.second);
     }

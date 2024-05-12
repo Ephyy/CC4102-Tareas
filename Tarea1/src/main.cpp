@@ -4,49 +4,49 @@
 #include "Node.h"
 #include "Entry.h"
 #include "MTreeSS.h"
+#include "RangeQuery.h"
 
 using namespace std;
+
+const int MAX = 4096;
+const double RANGE = 0.02; // retorna aproximadamente un 0.12% de los puntos del conjunto
 
 int main() {
     std::cout << "TESTING" << std::endl;
 
-//     Point p = Point(1, 2);
-//     auto n1 = std::make_shared<Node>(2);
-//     Entry e1 = Entry(p, 3, n1);
+    // Set default values
+    int entry_bytes = sizeof(Entry);	
+    int max_entries = MAX / entry_bytes;
 
-    std::cout << e1.get_a()->get_B() << std::endl;
+    // Create 100 queries
+    vector<Point> query_points = generateRandomPoints(100, 1);
+    vector<RangeQuery> queries;
+    for (Point p : query_points) {
+        queries.push_back(RangeQuery(p, RANGE));
+    }
 
-    // MTREE BY SS TESTING
-    vector<Point> points = generateRandomPoints(100, 1);
+    // Create points for the M tree
+    int exp = 10;
+    int n = pow(2, exp);
+    vector<Point> points = generateRandomPoints(n, 1);
+    cout << "Generating M-Tree with " << n << " poins..." << endl;
+    
+    MTreeBySS mtree = MTreeBySS(max_entries);
     vector<shared_ptr<Point>> shared_points;
     for (Point p : points) {
         shared_points.push_back(make_shared<Point>(p));
     }
     points.clear();
-    MTreeBySS mtree = MTreeBySS(10);
 
     cout << "Setting node..." << endl;
     mtree.set_node(shared_points);
-    cout << "DONE" << endl;
+    cout << "M-Tree by SS algorithm finished." << endl;
 
-    cout << "Final M tree" << endl;
-    cout << "Entries Root Node: " << endl;
-    for (Entry e : mtree.node->get_entries()) {
-        cout << e.get_p() << endl;
-    }
-    cout << "Entries first son Node: " << endl;
-    for (Entry e : mtree.node->get_entries()[0].get_a()->get_entries()) {
-        cout << e.get_p() << endl;
-    }
-    cout << "Entries second son Node: " << endl;
-    for (Entry e : mtree.node->get_entries()[1].get_a()->get_entries()) {
-        cout << e.get_p() << endl;
-    }
-    // cout << "Entries third son Node: " << endl;
-    // for (Entry e : mtree.node->get_entries()[2].get_a()->get_entries()) {
-    //     cout << e.get_p() << endl;
-    // }
+    RangeQuery first_query = queries[0];
+    vector<Point> answer;
+    first_query.lookup(mtree.node, answer);
+    cout << "First query answer: " << answer.size() << " points." << endl;
 
-//     return 0;
-// }
+    return 0;
+}
 

@@ -5,9 +5,9 @@
 #include <vector>
 #include <iostream>
 #include <compare>
+#include <algorithm>
 
 using namespace std;
-
 
 struct Point {
     double x;
@@ -29,5 +29,16 @@ struct Point {
 double dist(Point p, Point q);
 vector<Point> generateRandomPoints(int n, double range);
 std::ostream& operator<<(std::ostream& os, const Point& p);
+
+// Closest pair of points
+bool compareX(Point p1, Point p2);
+bool compareY(Point p1, Point p2);
+pair<double, pair<Point, Point>> bruteForce(vector<Point> P, int n);
+pair<double, pair<Point, Point>> stripClosest(vector<Point> strip, int size, double d, pair<Point, Point> closest);
+pair<double, pair<Point, Point>> closestUtil(vector<Point> Px, vector<Point> Py, int n);
+pair<double, pair<Point, Point>> closest(vector<Point> points, int n);
+
+
+
 
 #endif
