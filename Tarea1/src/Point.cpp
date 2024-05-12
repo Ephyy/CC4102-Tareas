@@ -49,6 +49,21 @@ vector<Point> generateRandomPoints(int n, double range) {
     return points;
 }
 
+// Generate n random points in the range [0, 1]
+vector<Point> generateRandomPoints(int n, int seed) {
+    std::vector<Point> points;
+    std::mt19937 gen(seed); // Random number generator
+    std::uniform_real_distribution<double> dis(0, 1);  // Rango [0, 1]
+
+    for (int i = 0; i < n; i++) {
+        double x = dis(gen);
+        double y = dis(gen);
+        Point p = Point(x, y);
+        points.push_back(p);
+    }
+
+    return points;
+}
 
 // Overload << operator para imprimir puntos
 std::ostream& operator<<(std::ostream& os, const Point& p) {
