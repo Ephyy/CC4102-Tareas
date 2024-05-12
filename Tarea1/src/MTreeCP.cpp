@@ -177,10 +177,34 @@ map<int, vector<int>> nearestSample(vector<Point>& points, vector<int>& index_po
     return F;
 }
 
+// Funcion auxiliar para los pasos 2 al 5
+map<int, vector<int>> getFinalSamples(vector<int>& index_point, vector<Point>& points, double B, double b) {
 
-// ## Paso 1 al 5) del metodo CP.
+    // Paso 2
+    vector<int> samples = selectRandomPoints(index_point, B); 
+    // Paso 3 y 4
+    map<int, vector<int>> nearestSamples = nearestSample(points, index_point, samples, b); // Paso 3 y 4
+
+    // Paso 5: Si solo hay un punto en el conjunto volver a paso 2
+    int count = 0;
+    while (nearestSamples.size() == 1) {
+        cout << "PASO5: Escoger nuevos samples, anterior: " << samples << endl;
+        samples = selectRandomPoints(index_point, B); // Paso 2
+        nearestSamples = nearestSample(points, index_point, samples, b); // Paso 3 y 4
+        count++;
+        if (count > 5) {
+            cout << "===== LOOP =====" << endl;
+            break;
+        }
+    }
+
+    return nearestSamples;
+}
+
+
+// BulkLoading
 //
-// Algoritmo recursivo que construye el arbol CP
+// Algoritmo recursivo que construye un arbol CP a partir de un conjunto de puntos
 //
 // Returns:
 //  El arbol T de un conjunto de puntos
@@ -200,23 +224,8 @@ Node BulkLoading(vector<int> index_point, vector<Point> points, double B) {
     // Construyo el arbol T
     Node tree = Node(B);
 
-    // Paso 2
-    vector<int> samples = selectRandomPoints(index_point, B); 
-    // Paso 3 y 4
-    map<int, vector<int>> nearestSamples = nearestSample(points, index_point, samples, tree.get_b()); // Paso 3 y 4
-
-    // Paso 5: Si solo hay un punto en el conjunto volver a paso 2
-    int count = 0;
-    while (nearestSamples.size() == 1) {
-        cout << "PASO5: Escoger nuevos samples, anterior: " << samples << endl;
-        samples = selectRandomPoints(index_point, B); // Paso 2
-        nearestSamples = nearestSample(points, index_point, samples, tree.get_b()); // Paso 3 y 4
-        count++;
-        if (count > 5) {
-            cout << "===== LOOP =====" << endl;
-            break;
-        }
-    }
+    // Paso 2 al 5
+    map<int, vector<int>> nearestSamples = getFinalSamples(index_point, points, B, tree.get_b());
 
     // Paso 6: Se realiza recursivamente el algoritmo para cada conjunto de puntos
     for (const auto& [s, F] : nearestSamples) {
@@ -287,24 +296,9 @@ std::shared_ptr<Node> cpAlgorithm(vector<Point>& points, double B, double b) {
     vector<int> index_point(n);
     std::iota(index_point.begin(), index_point.end(), 0);
 
-    // Paso 2
-    vector<int> samples = selectRandomPoints(index_point, B); 
-    // Paso 3 y 4
-    map<int, vector<int>> nearestSamples = nearestSample(points, index_point, samples, b); 
+    // Paso 2 al 5
+    map<int, vector<int>> nearestSamples = getFinalSamples(index_point, points, B, b);
 
-    // Paso 5:
-    // Si solo hay un punto en el conjunto volver a paso 2
-    int count = 0;
-    while (nearestSamples.size() == 1) {
-        cout << "PASO5: Escoger nuevos samples, anterior: " << samples << endl;
-        samples = selectRandomPoints(index_point, B); // Paso 2
-        nearestSamples = nearestSample(points, index_point, samples, b); // Paso 3 y 4
-        count++;
-        if (count > 5) {
-            cout << "===== LOOP =====" << endl;
-            break;
-        }
-    }
     
     // Paso 6, se realiza recursivamente el algoritmo para cada conjunto de puntos
     map<int, std::shared_ptr<Node>> subTrees; // Sub arboles de los samples
