@@ -1,3 +1,4 @@
+#include "Point.h"
 #include "Entry.h"
 #include "Node.h"
 
@@ -16,6 +17,15 @@ std::shared_ptr<Node> Entry::get_a() const {
     return a;
 }
 
+void Entry::set_cr(double cr) {
+    this->cr = cr;
+}
+
+void Entry::set_a(std::shared_ptr<Node> a)
+{
+    this->a = a;
+}
+
 // Print de una Entry
 std::ostream& operator<<(std::ostream& os, const Entry& e) {
     if (e.get_a()) {
@@ -29,7 +39,7 @@ std::ostream& operator<<(std::ostream& os, const Entry& e) {
 std::ostream& operator<<(std::ostream& os, const std::vector<Entry>& entries) {
     os << "[";
     for (const auto& e : entries) {
-        os << e << ", ";
+        os << e << ",";
     }
     os << "]";
     return os;

@@ -78,8 +78,6 @@ std::ostream& operator<<(std::ostream& os, const std::map<int, std::shared_ptr<N
 }
 
 
-
-
 // Función que dado un punto, devuelve su índice en un vector de puntos
 int findPointIndex(const Point& point, const vector<Point>& points) {
     auto it = find(points.begin(), points.end(), point);
@@ -141,41 +139,28 @@ vector<int> selectRandomPoints(vector<int>& index_points, int B) {
 map<int, vector<int>> nearestSample(vector<Point>& points, vector<int>& index_points, vector<int>& samples, double b) {
     vector<int> samplesCopia = samples;
     map<int, vector<int>> F;
-    for (const int& sample : samples) {
-        F[sample] = vector<int>();
-    }
+
 
     for (const int& p_i : index_points) {
-        // TODO: opt?
-
-        // Si el punto no es un sample, lo asignamos al sample más cercano
-        if (std::find(samples.begin(), samples.end(), p_i) == samples.end()) {
-            int nearestSamp = nearestPoint(p_i, samples, points); // Encuentra el sample más cercano
-            F[nearestSamp].push_back(p_i); // Agrega p al conjunto de puntos del sample más cercano
-        }
+        int nearestSamp = nearestPoint(p_i, samples, points); // Encuentra el sample más cercano
+        F[nearestSamp].push_back(p_i); // Agrega p al conjunto de puntos del sample más cercano
     }
 
 
     // Paso 4:
     // Se redistribuyen los puntos si un sample tiene menos de b puntos
-
-    // Por cada conjunto (F_j)
-    for (int j = 0; j < samples.size(); j++) {
-        int f = samples[j];
-        if (F[f].size() < b) {
+    for (const int& s : samples) {
+        if (F[s].size() < b) {
             cout << "==== DISTRIBUCION ====" << endl;
-            // Agregamos el sample a F[j]
-            F[f].push_back(f);
-
             // Obtenemos los puntos a redistribuir
-            vector<int> toDistribute = F[f];
+            vector<int> toDistribute = F[s];
 
             // Lo boramos de la lista de samples
-            samplesCopia.erase(samplesCopia.begin() + j);
+            samplesCopia.erase(std::remove(samplesCopia.begin(), samplesCopia.end(), s), samplesCopia.end());
+            F.erase(s); // Borramos el sample del map
             
-            F.erase(f); // Borramos el sample del map
+            cout << "Redistribuimos: " << s << " -> " << toDistribute << endl;
 
-            cout << "Redistribuimos: " << f << " -> " << toDistribute << endl;
             // Distribuimos los puntos en el resto de los samples
             for (const int& p_i : toDistribute) {
                 int nearestSamp = nearestPoint(p_i, samplesCopia, points);
@@ -184,9 +169,8 @@ map<int, vector<int>> nearestSample(vector<Point>& points, vector<int>& index_po
 
             }
         }
-
     }
-
+ 
     samples = samplesCopia;
 
     return F;
@@ -256,22 +240,106 @@ void splitIntoSubTrees(map<int, std::shared_ptr<Node>>& newSubTrees, int s, std:
     } else {
         // Caso recursivo:
         // Se recorre el arbol en busca de sub arboles de altura h
-        for (const auto& entry : tree->get_entries()) {
+        if (!tree->is_leaf()) {
+            for (const auto& entry : tree->get_entries()) {
+                // Obtengo el punto
+                Point p = entry.get_p();
+                // Obtengo el indice
+                int new_sample = findPointIndex(p, points);
+                // Obtengo el sub arbol
+                std::shared_ptr<Node> subTree = entry.get_a();
+                // Llamada recursiva
+                splitIntoSubTrees(newSubTrees, new_sample, subTree, h, points);
+            }
+        }
+    }
+}
+
+// Funcion auxiliar para el paso 11
+// Dado Tsup y un map de sub arboles, se agregan los sub arboles en las hojas de Tsup
+void addSubTrees(Node& Tsup, map<int, std::shared_ptr<Node>>& subTrees, vector<Point>& points) {
+    if (Tsup.is_leaf()) {
+        // Reviso las entradas de Tsup
+        for (Entry& entry : Tsup.get_entries()) {
             // Obtengo el punto
             Point p = entry.get_p();
             // Obtengo el indice
             int new_sample = findPointIndex(p, points);
             // Obtengo el sub arbol
-            std::shared_ptr<Node> subTree = entry.get_a();
-            // Llamada recursiva
-            splitIntoSubTrees(newSubTrees, new_sample, subTree, h, points);
+            std::shared_ptr<Node> subTree = subTrees[new_sample];
+            // Agrego el sub arbol
+            entry.set_a(subTree);
+        }
+    } else {
+        // Llamada recursiva
+        for (Entry& entry : Tsup.get_entries()) {
+            addSubTrees(*entry.get_a(), subTrees, points);
         }
     }
 }
 
+// // Funcion auxiliar para el paso 12
+// // Función recursiva para actualizar el radio de cobertura de cada entrada en el árbol
+// void updateCoveringRadius(Node& Tree) {
+//     for (auto &entry : Tree.get_entries()) {
+//         // Si mi entrada apunta a un nodo hoja
+//         if (entry.get_a()->is_leaf()) {
+//             entry.set_cr(calculate_cr(entry));
+//         } else {
+//             // Si mi entrada apunta a un nodo interno
+//             // Se actualiza el cr del Entry como el maximo cr de las entradas hijas
+//             double max_cr = 0;
+//             for (auto& entry_interno : entry.get_a()->get_entries()) {
+//                 double cr = calculate_cr(entry_interno);
+//                 if (cr > max_cr) {
+//                     max_cr = cr;
+//                 }
+//                 entry.set_cr(max_cr);
+//             }
+//         }
+//     }
+// }
+
+
+// //Crea una funcion que recorra el arbole recursivamente,
+// // y setee el cr de cada entrada como el maximo cr de las entradas hijas, 
+// // y para las entradas que apuntan a un nodo hijo, calcular el cr como la distancia mayorentre la entrada y 
+// // las entradas del nodo hoja.
+// // Función recursiva para actualizar el radio de cobertura de cada entrada en el árbol
+
+
+// double calculate_cr(Entry& entry) {
+//     // Si mi entrada apunta a un nodo hoja
+//     if (entry.get_a()->is_leaf()) {
+//         // Se actualiza el cr del Entry 
+//         // como el maxima distancia entre el punto de la entrada y los puntos de las hojas
+//         double distMax = 0;
+//         for (const auto& entry_hoja : entry.get_a()->get_entries()) {
+//             double d = dist(entry.get_p(), entry_hoja.get_p());
+//             if (d > distMax) {
+//                 distMax = d;
+//             }
+//         }
+//         return distMax;
+
+//     } else {
+//         // Si mi entrada apunta a un nodo interno
+//         // Se actualiza el cr del Entry como el maximo cr de las entradas hijas
+//         double max_cr = 0;
+//         for (auto& entry_interno : entry.get_a()->get_entries()) {
+//             double cr = calculate_cr(entry_interno);
+//             if (cr > max_cr) {
+//                 max_cr = cr;
+//             }
+//         }
+//         return max_cr;
+//     }
+// }
+
+
 
 // Algoritmo 
-map<int, std::shared_ptr<Node>> cpAlgorithm(vector<Point>& points, double B) {
+Node cpAlgorithm(vector<Point>& points, double B) {
     int n = points.size();
     double b = 0.5 * B;
 
@@ -282,6 +350,7 @@ map<int, std::shared_ptr<Node>> cpAlgorithm(vector<Point>& points, double B) {
 
     vector<int> samples = selectRandomPoints(index_point, B); // Paso 2
     map<int, vector<int>> nearestSamples = nearestSample(points, index_point, samples, b); // Paso 3 y 4
+
     map<int, std::shared_ptr<Node>> subTrees; // Sub arboles de los samples
     for (const auto& [s, F] : nearestSamples) {
         auto a = std::make_shared<Node>(BulkLoading(F, points, B));
@@ -301,6 +370,7 @@ map<int, std::shared_ptr<Node>> cpAlgorithm(vector<Point>& points, double B) {
         int s = it->first;
         std::shared_ptr<Node> subT = it->second;
         int childs = subT->get_entries().size();
+
         if (childs < subT->get_b()) {
             cout << "Sub arbol: " << s << " es menor a b" << endl;
             cout << "Cantidad de hijos: " << childs << endl;
@@ -334,7 +404,6 @@ map<int, std::shared_ptr<Node>> cpAlgorithm(vector<Point>& points, double B) {
     
     // Paso 8 : Calcular la altura mínima de los árboles en subTrees
     int h = INT_MAX;
-    map<int, std::shared_ptr<Node>> newSubTrees;
     for (const auto& [s, subT] : subTrees) {
         int height = subT->height();
         if (height < h) {
@@ -348,6 +417,7 @@ map<int, std::shared_ptr<Node>> cpAlgorithm(vector<Point>& points, double B) {
     // 1. Se borra el sample
     // 2. Se hace un busqueda exhaustiva en el arbol para encontrar todos los sub arboles de altura h. Se agregan a newSubTrees
     // 3. Se agregan los puntos pertinentes de estos sub arboles como samples
+    map<int, std::shared_ptr<Node>> newSubTrees;
     it = subTrees.begin();
     while (it != subTrees.end()) {
         int s = it->first;
@@ -376,7 +446,30 @@ map<int, std::shared_ptr<Node>> cpAlgorithm(vector<Point>& points, double B) {
         }
     }
 
-    return subTrees;
+    // Paso 10, se calcula el arbol Tsup a partir de los samples que quedaron
+    vector<int> finalSamples;
+    for (const auto& [s, subT] : newSubTrees) {
+        finalSamples.push_back(s);
+    }
+
+    Node T_sup = BulkLoading(finalSamples, points, B);
+    cout << "PASO10: Tsup" << endl;
+    cout << "> Tsup = " << T_sup << endl;
+
+    // Paso 11, agregar en las hojas de Tsup los sub arboles de newSubTrees
+    // Recoremos el arboll Tsup
+    addSubTrees(T_sup, newSubTrees, points);
+    cout << "PASO11: Tsup post agregacion de los subTree" << endl;
+    cout << "> Tsup = " << T_sup << endl;
+
+    // Paso 12, actualizar el radio de cobertura de cada entrada en el arbol
+    Node Tree = T_sup;
+    // updateCoveringRadius(Tree);
+    cout << "PASO12: Arbol final" << endl;
+    // cout << "> Tree = " << Tree << endl;
+
+
+    return Tree;
 }
 
 
@@ -391,9 +484,14 @@ int main() {
     
     // Crear un arbol CP
     double B = 4;
-    map<int, std::shared_ptr<Node>> subTrees = cpAlgorithm(points, B);
 
+    Node Tree = cpAlgorithm(points, B);
 
+    
+    // Node Tree = BulkLoading({0, 1, 2, 3, 4, 5, 6, 7}, points, B);
+    // cout << "Arbol CP: " << Tree << endl;
+    // updateCoveringRadius(Tree);
+    // cout << "Arbol CP: " << Tree << endl;
 
 
     // Capturar el tiempo de finalización

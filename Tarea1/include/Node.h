@@ -29,12 +29,14 @@ public:
     std::vector<Entry> get_entries() const;
     double get_b() const;
     double get_B();
-    std::vector<Entry> get_entries();
+    std::vector<Entry>& get_entries();
 
+    // Setters
     void insert(Entry e);
-
-    
 };
+
+
+// void update_cr(Node n);
 
 // Print
 std::ostream& operator<<(std::ostream& os, const Node& n);
