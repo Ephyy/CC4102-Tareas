@@ -10,10 +10,6 @@ Cluster::Cluster(double max_size) :
     points() {
 }
 
-// Think about an optimization for this function 
-// Podria ir guardando los iteradores de los puntos en un set
-// Pensando que cada punto es una única instancia de Point, puedo guardar una tupla con ambos punteros
-// y las distancias en un set ordenado por distancia ayyy no se
 shared_ptr<Point> Cluster::set_primary_medoid() {
     if (this->points.size() == 1) {
         this->primary_medoid = shared_ptr<Point>(this->points[0]);
@@ -192,21 +188,24 @@ bool Cluster::operator==(const Cluster &cluster) const {
 pair<pair<Cluster, vector<Cluster>::iterator>, pair<Cluster, vector<Cluster>::iterator>> closest_pair(vector<Cluster> &clusters) {
     pair<Cluster, vector<Cluster>::iterator> cluster1_pair = make_pair(clusters[0], clusters.begin());
     pair<Cluster, vector<Cluster>::iterator> cluster2_pair = make_pair(clusters[1], clusters.begin() + 1);
-    double min_distance = 100; //= cluster1_pair.first.distance(cluster2_pair.first);
-    for (auto cluster1_iter = clusters.begin(); cluster1_iter != clusters.end(); cluster1_iter++) {
-        Cluster current_cluster1 = *cluster1_iter;
-        pair<Cluster, vector<Cluster>::iterator> current_cluster2_pair = current_cluster1.nearest_neighbour(clusters);
-        Cluster current_cluster2 = current_cluster2_pair.first;
-        double distance = current_cluster1.distance(current_cluster2);
-        if (distance < min_distance) {
-            min_distance = distance;
-            cluster1_pair = make_pair(*cluster1_iter, cluster1_iter);
-            cluster2_pair = current_cluster2_pair;
-        }
+    vector<Point> points;
+    for (auto cluster : clusters) { // en tiempo n
+        points.push_back(Point(*cluster.primary_medoid));
     }
-    if (cluster1_pair.first.size() < cluster2_pair.first.size()) {
-        return make_pair(cluster2_pair, cluster1_pair);
-    }
+    pair<double, pair<Point, Point>> closest_points = closest(points, points.size()); // tiempo nlogn
+
+    Point p1 = closest_points.second.first;
+    Point p2 = closest_points.second.second;
+    vector<Cluster>::iterator cluster1_iter = find_if(clusters.begin(), clusters.end(), [&p1] (Cluster c) { // tiempo n
+        return *c.primary_medoid == p1;
+    });
+    vector<Cluster>::iterator cluster2_iter = find_if(clusters.begin(), clusters.end(), [&p2] (Cluster c) {
+        return *c.primary_medoid == p2;
+    });
+
+    cluster1_pair = make_pair(Cluster(*cluster1_iter), cluster1_iter);
+    cluster2_pair = make_pair(Cluster(*cluster2_iter), cluster2_iter);
+
     return make_pair(cluster1_pair, cluster2_pair);
 }
 
