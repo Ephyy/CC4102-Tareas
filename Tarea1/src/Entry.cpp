@@ -16,6 +16,10 @@ std::shared_ptr<Node> Entry::get_a() const {
     return a;
 }
 
+void Entry::set_cr(double cr) {
+    this->cr = cr;
+}
+
 // Print de una Entry
 std::ostream& operator<<(std::ostream& os, const Entry& e) {
     if (e.get_a()) {

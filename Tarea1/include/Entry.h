@@ -20,6 +20,8 @@ public:
     Point get_p() const;
     double get_cr() const;
     std::shared_ptr<Node> get_a() const;
+
+    void set_cr(double cr);
 };
 
 // Print
