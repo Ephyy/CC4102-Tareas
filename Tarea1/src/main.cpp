@@ -72,7 +72,7 @@ void experiment(int method, int n_exp) {
     std::ofstream file;
     filename = "..\\experiments\\experimento_" + method_str + "_" + to_string(n_exp) + ".tsv";
     file.open(filename);
-    file << "id_query\tq\tios\ttime\n";
+    file << "id_query\tq\tios\tsize\tanswer\ttime\n";
 
     
     // Crear las 100 consultas
@@ -86,6 +86,11 @@ void experiment(int method, int n_exp) {
         vector<Point> answer;
         int ios = query.lookup(root, answer);
 
+        string answer_str = "";
+        for (Point p : answer) {
+            answer_str += "(" + to_string(p.get_x()) + ", " + to_string(p.get_y()) + ")" + "; ";
+        }
+
         // Capturar el tiempo de finalización
         auto fin = std::chrono::high_resolution_clock::now();
         // Calcular la diferencia de tiempo
@@ -95,8 +100,9 @@ void experiment(int method, int n_exp) {
         string id_query = to_string(i);
         string point = "(" + to_string(p.get_x()) + ", " + to_string(p.get_y()) + ")";
         string ios_str = to_string(ios);
+        string size = to_string(answer.size());
         string time = to_string(duracion.count());
-        file << id_query + "\t" + point + "\t" + ios_str + "\t" + time + "\n";
+        file << id_query + "\t" + point + "\t" + ios_str + "\t" + size + "\t" + answer_str + "\t" + time + "\n";
         i++;
     }   
 
@@ -107,7 +113,7 @@ void experiment(int method, int n_exp) {
 
 int main() {
     // Correr experimento
-    experiment(CP_METHOD, 10);
+    experiment(SS_METHOD, 10);
     return 0;
 }
 
