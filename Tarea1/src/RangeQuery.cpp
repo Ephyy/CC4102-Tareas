@@ -13,7 +13,7 @@ int RangeQuery::lookup(shared_ptr<Node> node, vector<Point> &answer) {
         }
         return 1;
     } else {
-        int count = 0;
+        int count = 1;
         for (Entry entry : node->get_entries()) {
             if (dist(entry.get_p(), q) <= r + entry.get_cr()) {
                 count += lookup(entry.get_a(), answer);
