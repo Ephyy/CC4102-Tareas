@@ -84,3 +84,27 @@ std::ostream& operator<<(std::ostream& os, const Node& n) {
     os << "Node(" << n.get_entries() << ")";
     return os;
 }
+
+
+// Se setean los radios cobertores resultantes para cada 
+// entrada en este árbol.
+void set_covering_radius(shared_ptr<Node> node) {
+    if (node->is_leaf()) {
+        // Cada hoja tiene un radio cobertor de 0
+        for (Entry &entry : node->get_entries()) {
+            entry.set_cr(0);
+        }
+    } else {
+        for (Entry &entry : node->get_entries()) {
+            // Seteo el radio del nodo hijo
+            set_covering_radius(entry.get_a());
+            // Calculo el radio de la entrada actual
+            double max_radius = 0;
+            for (Entry child_entry : entry.get_a()->get_entries()) {
+                max_radius = max(max_radius, dist(entry.get_p(), child_entry.get_p()) + child_entry.get_cr());
+            }
+            entry.set_cr(max_radius);
+        }
+    }
+    return;
+}
