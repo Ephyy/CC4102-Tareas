@@ -421,30 +421,30 @@ void MTreeByCP::set_node(vector<Point>& points) {
 
 
 // Main 
-int main() {
-    // Capturar el tiempo de inicio
-    auto inicio = std::chrono::high_resolution_clock::now();
+// int main() {
+//     // Capturar el tiempo de inicio
+//     auto inicio = std::chrono::high_resolution_clock::now();
 
-    // Crear un vector de puntos
-    int n = 64;
-    vector<Point> points = generateRandomPoints(n, 1);
+//     // Crear un vector de puntos
+//     int n = 64;
+//     vector<Point> points = generateRandomPoints(n, 1);
     
-    // Crear un arbol CP
-    MTreeByCP Tree(4);
-    Tree.set_node(points);
+//     // Crear un arbol CP
+//     MTreeByCP Tree(4);
+//     Tree.set_node(points);
     
-    // Node Tree = BulkLoading({0, 1, 2, 3, 4, 5, 6, 7}, points, B);
-    // cout << "Arbol CP: " << Tree << endl;
-    // updateCoveringRadius(Tree);
-    // cout << "Arbol CP: " << Tree << endl;
+//     // Node Tree = BulkLoading({0, 1, 2, 3, 4, 5, 6, 7}, points, B);
+//     // cout << "Arbol CP: " << Tree << endl;
+//     // updateCoveringRadius(Tree);
+//     // cout << "Arbol CP: " << Tree << endl;
 
 
-    // Capturar el tiempo de finalización
-    auto fin = std::chrono::high_resolution_clock::now();
-    // Calcular la diferencia de tiempo
-    std::chrono::duration<double> duracion = fin - inicio;
-    std::cout << "Tiempo de ejecución: " << duracion.count() << " segundos" << std::endl;
+//     // Capturar el tiempo de finalización
+//     auto fin = std::chrono::high_resolution_clock::now();
+//     // Calcular la diferencia de tiempo
+//     std::chrono::duration<double> duracion = fin - inicio;
+//     std::cout << "Tiempo de ejecución: " << duracion.count() << " segundos" << std::endl;
     
-    return 0;
-}
+//     return 0;
+// }
 
