@@ -41,4 +41,7 @@ public:
 // Print
 std::ostream& operator<<(std::ostream& os, const Node& n);
 
+// Update cr
+void set_covering_radius(shared_ptr<Node> node);
+
 #endif

@@ -21,6 +21,8 @@ public:
     double get_cr() const;
     std::shared_ptr<Node> get_a() const;
 
+    // Setters
+    void set_a(std::shared_ptr<Node> a);
     void set_cr(double cr);
 };
 

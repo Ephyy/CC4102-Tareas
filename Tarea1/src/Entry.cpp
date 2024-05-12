@@ -21,8 +21,7 @@ void Entry::set_cr(double cr) {
     this->cr = cr;
 }
 
-void Entry::set_a(std::shared_ptr<Node> a)
-{
+void Entry::set_a(std::shared_ptr<Node> a) {
     this->a = a;
 }
 
