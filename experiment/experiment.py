@@ -5,7 +5,8 @@ import numpy as np
 # Exponente que indica la cantidad de puntos del set P
 # Es para el label más que nada
 # Y para el nombre del archivo ahora
-n = 14
+n = 13
+totalPuntos = 2**n
 
 # Para el método CP
 fileNameCP = 'experimento_CP_' + str(n) + '.tsv'
@@ -25,23 +26,27 @@ iosDataSS = dfSS['ios'].values
 promedioCP = iosDataCP.mean()
 stdCP = iosDataCP.std()
 intervaloConfianzaCP = 1.96 * (promedioCP / np.sqrt(len(iosDataCP)))
+dfCP['% del conjunto'] = (dfCP['size'] / totalPuntos)*100
 
 # Datos para SS
 promedioSS = iosDataSS.mean()
 stdSS = iosDataSS.std()
 intervaloConfianzaSS = 1.96 * (promedioSS / np.sqrt(len(iosDataSS)))
+dfSS['% del conjunto'] = (dfSS['size'] / totalPuntos)*100
 
 # Printeo de datos
 print(" ")
-print("Datos del método CP")
+print("Datos del método CP -------------------------------------------------")
 print("Promedio CP: " + str(promedioCP))
 print("Desviación estándar CP: " + str(stdCP))
 print("Intervalo de Confianza al 95%: " + str(intervaloConfianzaCP))
+print("Promedio del % del conjunto de puntos como respuesta a la búsqueda: " + str(dfCP['% del conjunto'].mean()))
 print(" ")
-print("Datos del método SS")
+print("Datos del método SS -------------------------------------------------")
 print("Promedio SS: " + str(promedioSS))
 print("Desviación estándar SS: " + str(stdSS))
 print("Intervalo de Confianza al 95%: " + str(intervaloConfianzaSS))
+print("Promedio del % del conjunto de puntos como respuesta a la búsqueda: " + str(dfSS['% del conjunto'].mean()))
 print(" ")
 
 # Se arman los histogramas a partir de los datos que supuestamente ya tenemos
