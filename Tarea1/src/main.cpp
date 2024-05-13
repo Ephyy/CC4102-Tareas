@@ -35,7 +35,7 @@ void experiment(int method, int n_exp) {
 
     // Archivo log de creación
     std::ofstream creation_file;
-    string filename = "..\\experiments\\creation\\creation_" + method_str + "_" + to_string(n_exp) + ".txt";
+    string filename = "../experiments/creation/creation_" + method_str + "_" + to_string(n_exp) + ".txt";
     creation_file.open(filename);
 
     // Crear los puntos
@@ -73,7 +73,7 @@ void experiment(int method, int n_exp) {
     
     // Archivo de consultas
     std::ofstream file;
-    filename = "..\\experiments\\experimento_" + method_str + "_" + to_string(n_exp) + ".tsv";
+    filename = "..  experiments/experimento_" + method_str + "_" + to_string(n_exp) + ".tsv";
     file.open(filename);
     file << "id_query\tq\tios\tsize\tanswer\ttime\n";
 
@@ -115,7 +115,8 @@ void experiment(int method, int n_exp) {
 }
 
 int main() {
-    for (int i = 11; i <= 14; i++) {
+    // Codigo de ejemplo que ejecuta todos los primeros 5 experimentos para el metodo CP
+    for (int i = 10; i <= 14; i++) {
         experiment(CP_METHOD, i);
     }
     return 0;

@@ -291,21 +291,32 @@ std::shared_ptr<Node> cpAlgorithm(vector<Point>& points, double B, double b) {
     std::iota(index_point.begin(), index_point.end(), 0);
 
     // Paso 2 al 5
+    cout << "TreeCP: Paso2-5..." << endl;
+    auto inicio = std::chrono::high_resolution_clock::now();
     map<int, vector<int>> nearestSamples = getFinalSamples(index_point, points, B, b);
+    auto fin = std::chrono::high_resolution_clock::now();
+    std::chrono::duration<double> duracion = fin - inicio;
+    std::cout << "Tiempo de ejecución: " << duracion.count() << " segundos" << std::endl;
 
     // Paso 6, se realiza recursivamente el algoritmo para cada conjunto de puntos
+    cout << "TreeCP: Paso6..." << endl;
+    inicio = std::chrono::high_resolution_clock::now();
     map<int, std::shared_ptr<Node>> subTrees; // Sub arboles de los samples
     for (const auto& [s, F] : nearestSamples) {
         auto a = std::make_shared<Node>(BulkLoading(F, points, B));
         subTrees[s] = a;
     }
+    fin = std::chrono::high_resolution_clock::now();
+    duracion = fin - inicio;
+    std::cout << "Tiempo de ejecución: " << duracion.count() << " segundos" << std::endl;
 
     // Paso 7
     // Si la raiz de un sub arbol es de un tamaño menor a b,
     // se elimina el sample
     // se trabaja con sus subarboles como nuevos arboles
     // se añaden los puntos pertinentes de estos sub arboles como samples
-
+    cout << "TreeCP: Paso7..." << endl;
+    inicio = std::chrono::high_resolution_clock::now();
     auto it = subTrees.begin();
     while (it != subTrees.end()) {
         int s = it->first;
@@ -333,10 +344,14 @@ std::shared_ptr<Node> cpAlgorithm(vector<Point>& points, double B, double b) {
         } else {
             it++;
         }
-
     }
+    fin = std::chrono::high_resolution_clock::now();
+    duracion = fin - inicio;
+    std::cout << "Tiempo de ejecución: " << duracion.count() << " segundos" << std::endl;
     
     // Paso 8 : Calcular la altura mínima de los árboles en subTrees
+    cout << "TreeCP: Paso8..." << endl;
+    inicio = std::chrono::high_resolution_clock::now();
     int h = INT_MAX;
     for (const auto& [s, subT] : subTrees) {
         int height = subT->height();
@@ -344,6 +359,9 @@ std::shared_ptr<Node> cpAlgorithm(vector<Point>& points, double B, double b) {
             h = height;
         }
     }
+    fin = std::chrono::high_resolution_clock::now();
+    duracion = fin - inicio;
+    std::cout << "Tiempo de ejecución: " << duracion.count() << " segundos" << std::endl;
 
     // Paso 9:
     // Por cada subTree si su altura es igual a h, se agrega a newSubTrees
@@ -351,6 +369,8 @@ std::shared_ptr<Node> cpAlgorithm(vector<Point>& points, double B, double b) {
     // 1. Se borra el sample
     // 2. Se hace un busqueda exhaustiva en el arbol para encontrar todos los sub arboles de altura h. Se agregan a newSubTrees
     // 3. Se agregan los puntos pertinentes de estos sub arboles como samples
+    cout << "TreeCP: Paso9..." << endl;
+    inicio = std::chrono::high_resolution_clock::now();
     map<int, std::shared_ptr<Node>> newSubTrees;
     it = subTrees.begin();
     while (it != subTrees.end()) {
@@ -366,22 +386,41 @@ std::shared_ptr<Node> cpAlgorithm(vector<Point>& points, double B, double b) {
             splitIntoSubTrees(newSubTrees, s, subT, h, points);
         }
     }
+    fin = std::chrono::high_resolution_clock::now();
+    duracion = fin - inicio;
+    std::cout << "Tiempo de ejecución: " << duracion.count() << " segundos" << std::endl;
 
     // Paso 10, se calcula el arbol Tsup a partir de los samples que quedaron
+    cout << "TreeCP: Paso10..." << endl;
+    inicio = std::chrono::high_resolution_clock::now();
     vector<int> finalSamples;
     for (const auto& [s, subT] : newSubTrees) {
         finalSamples.push_back(s);
     }
-
     Node T_sup = BulkLoading(finalSamples, points, B);
+    fin = std::chrono::high_resolution_clock::now();
+    duracion = fin - inicio;
+    std::cout << "Tiempo de ejecución: " << duracion.count() << " segundos" << std::endl;
+
 
     // Paso 11, agregar en las hojas de Tsup los sub arboles de newSubTrees
     // Recoremos el arboll Tsup
+    cout << "TreeCP: Paso11..." << endl;
+    inicio = std::chrono::high_resolution_clock::now();
     addSubTrees(T_sup, newSubTrees, points);
+    fin = std::chrono::high_resolution_clock::now();
+    duracion = fin - inicio;
+    std::cout << "Tiempo de ejecución: " << duracion.count() << " segundos" << std::endl;
 
     // Paso 12, actualizar el radio de cobertura de cada entrada en el arbol
+    cout << "TreeCP: Paso12..." << endl;
+    inicio = std::chrono::high_resolution_clock::now();
+
     std::shared_ptr<Node> Tree = std::make_shared<Node>(T_sup);
     set_covering_radius(Tree);
+    fin = std::chrono::high_resolution_clock::now();
+    duracion = fin - inicio;
+    std::cout << "Tiempo de ejecución: " << duracion.count() << " segundos" << std::endl;
     cout << "TreeCP: CP Tree creado" << endl;
     return Tree;
 }
